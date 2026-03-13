@@ -36,8 +36,8 @@ pros c install Vortex
 ### Method 2 — Direct URL
 
 ```bash
-pros c fetch https://github.com/jonahchang207/Vortex/releases/download/v2.0.6/Vortex.zip
-pros c install Vortex@2.0.6
+pros c fetch https://github.com/jonahchang207/Vortex/releases/download/v1.0.0/Vortex.zip
+pros c install Vortex@1.0.0
 ```
 
 ---

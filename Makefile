@@ -21,7 +21,7 @@ EXCLUDE_COLD_LIBRARIES  :=
 
 IS_LIBRARY := 1
 LIBNAME    := Vortex
-VERSION    := 2.0.6
+VERSION    := 1.0.0
 
 TEMPLATE_FILES = \
     $(wildcard $(INCDIR)/Vortex/*.hpp)    \
