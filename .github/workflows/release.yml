@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'The tag to release'
+        required: true
+        type: string
 
 jobs:
   build:
@@ -13,6 +19,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install dependencies
         run: sudo apt-get install -y zip
@@ -29,7 +37,14 @@ jobs:
 
       - name: Extract version
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "VERSION=${{ inputs.tag_name }}" | sed 's/v//' >> $GITHUB_OUTPUT
+            echo "TAG=${{ inputs.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+            echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Stamp template.pros version
         run: |
@@ -41,14 +56,15 @@ jobs:
 
       - name: Build release notes
         run: |
-          VERSION="v${{ steps.version.outputs.VERSION }}"
+          TAG="${{ steps.version.outputs.TAG }}"
+          VERSION="${{ steps.version.outputs.VERSION }}"
           cat > body.md << EOF
           ## Installation
 
           **Quick install:**
           \`\`\`bash
-          pros c fetch https://github.com/${{ github.repository }}/releases/download/${VERSION}/Vortex.zip
-          pros c install Vortex@${{ steps.version.outputs.VERSION }}
+          pros c fetch https://github.com/${{ github.repository }}/releases/download/${TAG}/Vortex.zip
+          pros c install Vortex@${VERSION}
           \`\`\`
 
           **Or download \`Vortex.zip\` below and run:**
@@ -68,7 +84,11 @@ jobs:
       - name: Publish release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ steps.version.outputs.TAG }}
           files: Vortex.zip
           body_path: body.md
+          draft: false
+          prerelease: false
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
