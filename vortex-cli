@@ -62,18 +62,18 @@ do_release() {
     git commit -m "$msg"
     info "Committed: $msg"
 
-    if [ "$branch" = "main" ]; then
-        step "Merging main → stable..."
-        git checkout stable
-        git merge main --no-ff -m "chore: bump version to $ver"
+    if [ "$branch" = "dev" ]; then
+        step "Merging dev → main..."
+        git checkout main
+        git merge dev --no-ff -m "chore: bump version to $ver"
 
         step "Tagging v$ver..."
         git tag -d "v$ver" 2>/dev/null
         git push origin ":refs/tags/v$ver" 2>/dev/null
         git tag "v$ver"
 
-        step "Pushing stable + tag..."
-        git push origin stable
+        step "Pushing main + tag..."
+        git push origin main
         git push origin "v$ver"
 
         if command -v gh &>/dev/null; then
@@ -91,10 +91,10 @@ do_release() {
             warn "gh CLI not found. Tag pushed — Actions will handle the release."
         fi
 
-        step "Syncing main with stable..."
-        git checkout main
-        git merge stable --no-ff -m "chore: sync main after v$ver"
-        git push origin main
+        step "Syncing dev with main..."
+        git checkout dev
+        git merge main --no-ff -m "chore: sync dev after v$ver"
+        git push origin dev
     else
         step "Tagging v$ver on $branch..."
         git tag "v$ver"

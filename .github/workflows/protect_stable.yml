@@ -1,9 +1,9 @@
-name: Protect Stable Branch
+name: Protect Main Branch
 
 on:
   push:
     branches:
-      - stable
+      - main
 
 jobs:
   check:
@@ -20,8 +20,8 @@ jobs:
           echo "Parent commits: $PARENTS"
           echo "Commit message: $MSG"
           if [ "$PARENTS" -lt 2 ] && ! echo "$MSG" | grep -qE "^chore: (bump|sync)"; then
-            echo "ERROR: Direct pushes to 'stable' are not allowed."
-            echo "Use './vortex-cli -R' from main to release a new version."
+            echo "ERROR: Direct pushes to 'main' are not allowed."
+            echo "Use './vortex-cli -R' from dev to release a new version."
             exit 1
           fi
           echo "Push validated."

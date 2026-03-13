@@ -62,7 +62,7 @@ jobs:
           pros c upgrade Vortex
           \`\`\`
 
-          See [CHANGELOG](https://github.com/${{ github.repository }}/blob/stable/CHANGELOG.md) for what changed.
+          See [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for what changed.
           EOF
 
       - name: Publish release
