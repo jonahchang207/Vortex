@@ -1,0 +1,6 @@
+{
+    "name": "Vortex",
+    "version": "2.0.6",
+    "target": "v5",
+    "supported_kernels": ">=3.2.0"
+}

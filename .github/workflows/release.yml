@@ -1,0 +1,74 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get install -y zip
+
+      - name: Install ARM GCC
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y gcc-arm-none-eabi g++-arm-none-eabi binutils-arm-none-eabi
+
+      - name: Build library
+        run: |
+          make clean
+          make library
+
+      - name: Extract version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Stamp template.pros version
+        run: |
+          sed -i "s/\"version\": \".*\"/\"version\": \"${{ steps.version.outputs.VERSION }}\"/" template.pros
+
+      - name: Package Vortex.zip
+        run: |
+          zip -r Vortex.zip include/Vortex bin/Vortex.a template.pros LICENSE README.md
+
+      - name: Build release notes
+        run: |
+          VERSION="v${{ steps.version.outputs.VERSION }}"
+          cat > body.md << EOF
+          ## Installation
+
+          **Quick install:**
+          \`\`\`bash
+          pros c fetch https://github.com/${{ github.repository }}/releases/download/${VERSION}/Vortex.zip
+          pros c install Vortex@${{ steps.version.outputs.VERSION }}
+          \`\`\`
+
+          **Or download \`Vortex.zip\` below and run:**
+          \`\`\`bash
+          pros c fetch Vortex.zip
+          pros c install Vortex
+          \`\`\`
+
+          **Upgrading from an older version:**
+          \`\`\`bash
+          pros c upgrade Vortex
+          \`\`\`
+
+          See [CHANGELOG](https://github.com/${{ github.repository }}/blob/stable/CHANGELOG.md) for what changed.
+          EOF
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: Vortex.zip
+          body_path: body.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

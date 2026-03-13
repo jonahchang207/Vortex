@@ -1,0 +1,273 @@
+#!/bin/bash
+
+# =============================================================================
+# Vortex CLI — Version management and release automation
+# =============================================================================
+
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'
+BLUE='\033[0;34m'; CYAN='\033[0;36m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
+
+info()    { echo -e "${GREEN}  [✓]${NC} $1"; }
+warn()    { echo -e "${YELLOW}  [!]${NC} $1"; }
+err()     { echo -e "${RED}  [✗]${NC} $1"; }
+step()    { echo -e "${BLUE}  [→]${NC} $1"; }
+header()  { echo -e "\n${BOLD}${CYAN}  ── $1 ──${NC}"; }
+
+confirm() {
+    read -p "$(echo -e "${YELLOW}  [?]${NC} $1 [y/N] ")" ans
+    [[ "$ans" =~ ^[Yy]$ ]]
+}
+
+# ── State ────────────────────────────────────────────────────────────────────
+
+get_version() { grep "VERSION:=" Makefile | cut -d'=' -f2; }
+get_branch()  { git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown"; }
+get_changes() { git status --short | wc -l | tr -d ' '; }
+is_clean()    { [ "$(git status --short | wc -l | tr -d ' ')" = "0" ]; }
+
+bump_version() {
+    local cur=$1 type=$2
+    IFS='.' read -r maj min pat <<< "$cur"
+    case $type in
+        major) echo "$((maj+1)).0.0" ;;
+        minor) echo "$maj.$((min+1)).0" ;;
+        patch) echo "$maj.$min.$((pat+1))" ;;
+    esac
+}
+
+# Portable in-place sed — macOS requires 'sed -i ""', GNU/Linux uses 'sed -i'
+_sed_i() {
+    if sed --version &>/dev/null 2>&1; then
+        sed -i "$@"       # GNU sed (Linux, GitHub Actions)
+    else
+        sed -i "" "$@"    # BSD sed (macOS)
+    fi
+}
+
+# Write new version to all three tracking files
+apply_version() {
+    local v=$1
+    _sed_i "s/VERSION:=.*/VERSION:=$v/"                                         Makefile
+    _sed_i "s/\"version\": \".*\"/\"version\": \"$v\"/"                         template.pros
+    _sed_i "s/download\/v[0-9.]*\/Vortex\.zip/download\/v$v\/Vortex.zip/g"      README.md
+    _sed_i "s/Vortex@[0-9.]*/Vortex@$v/g"                                       README.md
+    info "Version files updated → v$v"
+}
+
+do_release() {
+    local ver=$1 msg=$2 branch
+    branch=$(get_branch)
+
+    git add .
+    git commit -m "$msg"
+    info "Committed: $msg"
+
+    if [ "$branch" = "main" ]; then
+        step "Merging main → stable..."
+        git checkout stable
+        git merge main --no-ff -m "chore: bump version to $ver"
+
+        step "Tagging v$ver..."
+        git tag -d "v$ver" 2>/dev/null
+        git push origin ":refs/tags/v$ver" 2>/dev/null
+        git tag "v$ver"
+
+        step "Pushing stable + tag..."
+        git push origin stable
+        git push origin "v$ver"
+
+        if command -v gh &>/dev/null; then
+            step "Building library..."
+            make library 2>&1 | tail -3
+            step "Packaging Vortex.zip..."
+            zip -r Vortex.zip include/Vortex bin/Vortex.a template.pros LICENSE README.md -q
+            step "Creating GitHub release..."
+            gh release create "v$ver" Vortex.zip \
+                --title "Vortex v$ver" \
+                --notes "Release v$ver" --latest
+            rm -f Vortex.zip
+            info "GitHub release v$ver is live."
+        else
+            warn "gh CLI not found. Tag pushed — Actions will handle the release."
+        fi
+
+        step "Syncing main with stable..."
+        git checkout main
+        git merge stable --no-ff -m "chore: sync main after v$ver"
+        git push origin main
+    else
+        step "Tagging v$ver on $branch..."
+        git tag "v$ver"
+        git push origin "$branch" --tags
+        if command -v gh &>/dev/null; then
+            make library 2>&1 | tail -3
+            zip -r Vortex.zip include/Vortex bin/Vortex.a template.pros LICENSE README.md -q
+            gh release create "v$ver" Vortex.zip \
+                --title "Vortex v$ver ($branch)" \
+                --notes "Pre-release from $branch." --prerelease
+            rm -f Vortex.zip
+        fi
+    fi
+    info "Release v$ver complete!"
+}
+
+# =============================================================================
+# Non-interactive (flag) mode
+# =============================================================================
+
+if [ $# -gt 0 ]; then
+    cur=$(get_version); branch=$(get_branch)
+    bump="patch"; manual=""; release=false; msg=""
+
+    while getopts "MmpRPBDv:" opt 2>/dev/null; do
+        case $opt in
+            M) bump="major" ;;
+            m) bump="minor" ;;
+            p) bump="patch" ;;
+            R) release=true ;;
+            P) step "Purging Vortex cache..."; pros c purge Vortex; exit 0 ;;
+            B) step "Building library..."; make library; exit 0 ;;
+            D) step "Building docs..."; mkdocs build; exit 0 ;;
+            v) manual=$OPTARG ;;
+        esac
+    done
+    shift $((OPTIND-1)); msg=$1
+
+    # Version is ALWAYS bumped — this was the original bug
+    new=${manual:-$(bump_version "$cur" "$bump")}
+    [ -z "$msg" ] && msg="release: version $new"
+
+    apply_version "$new"
+
+    if [ "$release" = true ]; then
+        do_release "$new" "$msg"
+    else
+        CHANGED=$(git status --short | cut -c4- | tr '\n' ' ')
+        [ -z "$msg" ] && msg="dev: updates (${CHANGED:0:60})"
+        git add . && git commit -m "$msg" && git push origin "$branch"
+        info "Pushed v$new to $branch."
+    fi
+    exit 0
+fi
+
+# =============================================================================
+# Interactive menu
+# =============================================================================
+
+while true; do
+    cur=$(get_version); branch=$(get_branch); changes=$(get_changes)
+
+    bcolor=$YELLOW
+    [ "$branch" = "stable" ] && bcolor=$GREEN
+    [ "$branch" = "main"   ] && bcolor=$CYAN
+
+    clear
+    echo -e "${BOLD}${CYAN}"
+    echo "  ╦  ╦┌─┐┬─┐┌┬┐┌─┐─┐ ┬"
+    echo "  ╚╗╔╝│ │├┬┘ │ ├┤ ┌┴┬┘"
+    echo "   ╚╝ └─┘┴└─ ┴ └─┘┴ └─"
+    echo -e "${NC}"
+    echo -e "  ${DIM}v${cur}${NC}   ${bcolor}⎇  ${branch}${NC}   ${DIM}${changes} staged change(s)${NC}"
+    echo ""
+    echo -e "  ${BOLD}Bump + commit + release${NC}"
+    echo -e "  ${GREEN}1${NC}  Patch  ${DIM}v${cur} → v$(bump_version "$cur" patch)${NC}"
+    echo -e "  ${YELLOW}2${NC}  Minor  ${DIM}v${cur} → v$(bump_version "$cur" minor)${NC}"
+    echo -e "  ${RED}3${NC}  Major  ${DIM}v${cur} → v$(bump_version "$cur" major)${NC}"
+    echo -e "  ${CYAN}4${NC}  Manual ${DIM}enter exact version${NC}"
+    echo ""
+    echo -e "  ${BOLD}Other actions${NC}"
+    echo -e "  ${BLUE}5${NC}  Dev push      ${DIM}commit + push, no version bump${NC}"
+    echo -e "  ${BLUE}6${NC}  Release now   ${DIM}tag + merge current v${cur}${NC}"
+    echo -e "  ${BLUE}7${NC}  Build         ${DIM}make library${NC}"
+    echo -e "  ${BLUE}8${NC}  Docs          ${DIM}mkdocs build${NC}"
+    echo -e "  ${BLUE}9${NC}  Purge cache   ${DIM}pros c purge Vortex${NC}"
+    echo ""
+    echo -e "  ${DIM}q  quit${NC}"
+    echo ""
+    read -p "  → " choice
+
+    case $choice in
+
+    1|2|3|4)
+        case $choice in
+            1) new=$(bump_version "$cur" patch) ;;
+            2) new=$(bump_version "$cur" minor) ;;
+            3) new=$(bump_version "$cur" major) ;;
+            4)
+                header "Manual Version"
+                read -p "  Enter version: " new
+                [ -z "$new" ] && { warn "Cancelled."; sleep 1; continue; }
+                ;;
+        esac
+
+        header "Bump v$cur → v$new"
+        read -p "  Commit message (blank = auto): " msg
+        [ -z "$msg" ] && msg="release: version $new"
+
+        apply_version "$new"
+
+        if confirm "Create a full GitHub release (merge→stable, tag, upload)?"; then
+            do_release "$new" "$msg"
+        else
+            git add . && git commit -m "$msg" && git push origin "$(get_branch)"
+            info "Pushed v$new to $(get_branch) (no release)."
+        fi
+        read -p $'\n  Press Enter...'
+        ;;
+
+    5)
+        header "Dev Push (no bump)"
+        CHANGED=$(git status --short | cut -c4- | tr '\n' ' ')
+        read -p "  Commit message (blank = auto): " msg
+        [ -z "$msg" ] && msg="dev: updates (${CHANGED:0:60})"
+        git add . && git commit -m "$msg" && git push origin "$(get_branch)"
+        info "Pushed."
+        read -p $'\n  Press Enter...'
+        ;;
+
+    6)
+        header "Release v$cur"
+        if ! is_clean; then
+            warn "Uncommitted changes present. They will be included in this release."
+        fi
+        if confirm "Release current version v$cur?"; then
+            read -p "  Commit message (blank = auto): " msg
+            [ -z "$msg" ] && msg="release: version $cur"
+            do_release "$cur" "$msg"
+        fi
+        read -p $'\n  Press Enter...'
+        ;;
+
+    7)
+        header "Build Library"
+        make library && info "Build successful." || err "Build failed."
+        read -p $'\n  Press Enter...'
+        ;;
+
+    8)
+        header "Build Docs"
+        if command -v mkdocs &>/dev/null; then
+            mkdocs build && info "Docs built in site/."
+        else
+            err "mkdocs not found. Install: pip install mkdocs-material"
+        fi
+        read -p $'\n  Press Enter...'
+        ;;
+
+    9)
+        header "Purge Cache"
+        confirm "Run 'pros c purge Vortex'?" && pros c purge Vortex && info "Done."
+        read -p $'\n  Press Enter...'
+        ;;
+
+    q|Q)
+        echo -e "\n  ${DIM}Bye.${NC}\n"
+        exit 0
+        ;;
+
+    *)
+        warn "Unknown option."
+        sleep 0.3
+        ;;
+    esac
+done
