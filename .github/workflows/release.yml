@@ -13,7 +13,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: write
 
@@ -22,8 +22,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install dependencies
-        run: sudo apt-get install -y zip
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install PROS CLI
+        run: |
+          python3 -m pip install pros-cli
+
+      - name: Install ARM GCC
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '10.3-2021.10' # Recommended version for PROS
 
       - name: Extract version
         id: version
@@ -40,19 +51,23 @@ jobs:
         run: |
           sed -i "s/\"version\": \".*\"/\"version\": \"${{ steps.version.outputs.VERSION }}\"/" template.pros
 
-      - name: Build PROS Library
-        id: build
-        uses: LemLib/pros-build@v4
-        with:
-          # This action handles toolchain setup and runs 'pros make'
-          # Since IS_LIBRARY is set in Makefile, it will build Vortex.a
-          write_job_summary: true
+      - name: Fetch and Apply PROS Kernel
+        run: |
+          # This ensures common.mk and other dependencies are present
+          # We use the version specified in project.pros or a safe default
+          pros c fetch kernel@4.2.2
+          pros c apply kernel@4.2.2
+
+      - name: Build Library
+        run: |
+          make library
 
       - name: Package Vortex.zip
         run: |
           # Ensure Vortex.a exists before zipping
           if [ ! -f "bin/Vortex.a" ]; then
             echo "ERROR: bin/Vortex.a not found!"
+            ls -R bin/
             exit 1
           fi
           zip -r Vortex.zip include/Vortex bin/Vortex.a template.pros LICENSE README.md
