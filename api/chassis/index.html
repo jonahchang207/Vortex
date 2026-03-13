@@ -1,0 +1,1759 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A modular odometry and motion control library for VEX Robotics V5 using PROS.">
+      
+      
+        <meta name="author" content="Jonah Chang">
+      
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../odom/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Chassis - Vortex Odometry Library</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#chassis" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Vortex Odometry Library" class="md-header__button md-logo" aria-label="Vortex Odometry Library" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Vortex Odometry Library
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Chassis
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jonahchang207/Vortex" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jonahchang207/Vortex
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../installation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Installation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../setup/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Setup Guide
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../configuration/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Configuration
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../parameters/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Tuning Parameters
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/tuner/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../changelog/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Vortex Odometry Library" class="md-nav__button md-logo" aria-label="Vortex Odometry Library" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Vortex Odometry Library
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jonahchang207/Vortex" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jonahchang207/Vortex
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setup Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../parameters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tuning Parameters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/tuner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PID Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chassis
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chassis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#constructor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constructor
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#calibratebool-calibrateimu-true" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        calibrate(bool calibrateImu = true)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#calibratephysical" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        calibratePhysical()
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#odometry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Odometry
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Odometry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setposefloat-x-float-y-float-theta-bool-radians-false" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        setPose(float x, float y, float theta, bool radians = false)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getposebool-radians-false-bool-standardpos-false" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        getPose(bool radians = false, bool standardPos = false)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#motions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Motions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#movetoposex-y-theta-timeout-params-async" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        moveToPose(x, y, theta, timeout, params, async)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#movetopointx-y-timeout-params-async" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        moveToPoint(x, y, timeout, params, async)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#turnthenmovex-y-timeout-params-async" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        turnThenMove(x, y, timeout, params, async)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#turntoheadingheading-timeout-params-async" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        turnToHeading(heading, timeout, params, async)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#turntopointx-y-timeout-params-async" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        turnToPoint(x, y, timeout, params, async)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#swingtoheadingheading-side-timeout-params-async" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        swingToHeading(heading, side, timeout, params, async)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#followpath-lookahead-timeout-forwards-async" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        follow(path, lookahead, timeout, forwards, async)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tuning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tuning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tunelateraldist-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tuneLateral(dist, timeout)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tuneangularheading-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tuneAngular(heading, timeout)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#driver-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Driver Control
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Driver Control">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tankleft-right-disabledrivecurve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tank(left, right, disableDriveCurve)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arcadethrottle-turn-disabledrivecurve-desaturatebias" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        arcade(throttle, turn, disableDriveCurve, desaturateBias)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#curvaturethrottle-turn-disabledrivecurve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        curvature(throttle, turn, disableDriveCurve)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#waiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Waiting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        State
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../odom/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Odometry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tracking_wheels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tracking Wheels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PID & Exit Conditions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../util/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utility
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../auton_selector/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auton Selector
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#constructor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constructor
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#calibratebool-calibrateimu-true" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        calibrate(bool calibrateImu = true)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#calibratephysical" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        calibratePhysical()
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#odometry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Odometry
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Odometry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setposefloat-x-float-y-float-theta-bool-radians-false" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        setPose(float x, float y, float theta, bool radians = false)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getposebool-radians-false-bool-standardpos-false" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        getPose(bool radians = false, bool standardPos = false)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#motions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Motions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#movetoposex-y-theta-timeout-params-async" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        moveToPose(x, y, theta, timeout, params, async)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#movetopointx-y-timeout-params-async" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        moveToPoint(x, y, timeout, params, async)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#turnthenmovex-y-timeout-params-async" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        turnThenMove(x, y, timeout, params, async)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#turntoheadingheading-timeout-params-async" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        turnToHeading(heading, timeout, params, async)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#turntopointx-y-timeout-params-async" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        turnToPoint(x, y, timeout, params, async)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#swingtoheadingheading-side-timeout-params-async" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        swingToHeading(heading, side, timeout, params, async)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#followpath-lookahead-timeout-forwards-async" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        follow(path, lookahead, timeout, forwards, async)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tuning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tuning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tunelateraldist-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tuneLateral(dist, timeout)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tuneangularheading-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tuneAngular(heading, timeout)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#driver-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Driver Control
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Driver Control">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tankleft-right-disabledrivecurve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tank(left, right, disableDriveCurve)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arcadethrottle-turn-disabledrivecurve-desaturatebias" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        arcade(throttle, turn, disableDriveCurve, desaturateBias)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#curvaturethrottle-turn-disabledrivecurve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        curvature(throttle, turn, disableDriveCurve)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#waiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Waiting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        State
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="chassis">Chassis</h1>
+<p><code>#include "Vortex/chassis/chassis.hpp"</code></p>
+<p>The <code>Chassis</code> class is the top-level controller. It owns odometry, PID loops, background tasks, and every motion primitive.</p>
+<hr />
+<h2 id="constructor">Constructor</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">vortex</span><span class="o">::</span><span class="n">Chassis</span><span class="w"> </span><span class="nf">chassis</span><span class="p">(</span><span class="n">drivetrain</span><span class="p">,</span><span class="w"> </span><span class="n">linearSettings</span><span class="p">,</span><span class="w"> </span><span class="n">angularSettings</span><span class="p">,</span><span class="w"> </span><span class="n">sensors</span><span class="p">);</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1">// With custom drive curves:</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">vortex</span><span class="o">::</span><span class="n">Chassis</span><span class="w"> </span><span class="nf">chassis</span><span class="p">(</span><span class="n">drivetrain</span><span class="p">,</span><span class="w"> </span><span class="n">linear</span><span class="p">,</span><span class="w"> </span><span class="n">angular</span><span class="p">,</span><span class="w"> </span><span class="n">sensors</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">throttleCurve</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">steerCurve</span><span class="p">);</span>
+</code></pre></div>
+<hr />
+<h2 id="setup">Setup</h2>
+<h3 id="calibratebool-calibrateimu-true"><code>calibrate(bool calibrateImu = true)</code></h3>
+<p>Calibrates the IMU (up to 5 retries), then starts background tasks:
+- Odometry (10 ms)
+- Brain screen telemetry (20 ms)
+- Stall detection (10 ms)
+- SD card logging (100 ms)</p>
+<p>Call once in <code>initialize()</code>.</p>
+<h3 id="calibratephysical"><code>calibratePhysical()</code></h3>
+<p>Spins the robot 10 full rotations and prints suggested <code>scrubFactor</code> and <code>trackWidth</code>. Run before PID tuning.</p>
+<hr />
+<h2 id="odometry">Odometry</h2>
+<h3 id="setposefloat-x-float-y-float-theta-bool-radians-false"><code>setPose(float x, float y, float theta, bool radians = false)</code></h3>
+<p>Set the robot's current position. Theta is degrees by default.</p>
+<h3 id="getposebool-radians-false-bool-standardpos-false"><code>getPose(bool radians = false, bool standardPos = false)</code></h3>
+<p>Returns the current <code>Pose</code>. <code>standardPos=true</code> converts to math-standard CCW-from-east convention.</p>
+<hr />
+<h2 id="motions">Motions</h2>
+<p>All motions accept an <code>async</code> flag. When <code>true</code> the function returns immediately and the motion runs in a background task.</p>
+<h3 id="movetoposex-y-theta-timeout-params-async"><code>moveToPose(x, y, theta, timeout, params, async)</code></h3>
+<p>Drives to <code>(x, y)</code> and arrives facing <code>theta</code> degrees. Uses a carrot-point approach for smooth curves.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">chassis</span><span class="p">.</span><span class="n">moveToPose</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="p">,</span><span class="w"> </span><span class="mi">90</span><span class="p">,</span><span class="w"> </span><span class="mi">4000</span><span class="p">);</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">chassis</span><span class="p">.</span><span class="n">moveToPose</span><span class="p">(</span><span class="mi">-12</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">180</span><span class="p">,</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span><span class="w"> </span><span class="p">{.</span><span class="n">forwards</span><span class="o">=</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">lead</span><span class="o">=</span><span class="mf">0.4</span><span class="p">});</span>
+</code></pre></div>
+<h3 id="movetopointx-y-timeout-params-async"><code>moveToPoint(x, y, timeout, params, async)</code></h3>
+<p>Drives to <code>(x, y)</code> without a final heading constraint. Uses a trapezoidal motion profile.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">chassis</span><span class="p">.</span><span class="n">moveToPoint</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2000</span><span class="p">);</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">chassis</span><span class="p">.</span><span class="n">moveToPoint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">-24</span><span class="p">,</span><span class="w"> </span><span class="mi">2000</span><span class="p">,</span><span class="w"> </span><span class="p">{.</span><span class="n">forwards</span><span class="o">=</span><span class="nb">false</span><span class="p">});</span>
+</code></pre></div>
+<h3 id="turnthenmovex-y-timeout-params-async"><code>turnThenMove(x, y, timeout, params, async)</code></h3>
+<p>Turns to face <code>(x, y)</code> then drives straight to it. More accurate than <code>moveToPoint</code> when the robot starts badly misaligned.</p>
+<h3 id="turntoheadingheading-timeout-params-async"><code>turnToHeading(heading, timeout, params, async)</code></h3>
+<p>Turns in-place to an absolute heading (degrees).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">chassis</span><span class="p">.</span><span class="n">turnToHeading</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span><span class="w"> </span><span class="mi">1500</span><span class="p">);</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">chassis</span><span class="p">.</span><span class="n">turnToHeading</span><span class="p">(</span><span class="mi">270</span><span class="p">,</span><span class="w"> </span><span class="mi">2000</span><span class="p">,</span><span class="w"> </span><span class="p">{.</span><span class="n">direction</span><span class="o">=</span><span class="n">AngularDirection</span><span class="o">::</span><span class="n">CCW_COUNTERCLOCKWISE</span><span class="p">});</span>
+</code></pre></div>
+<h3 id="turntopointx-y-timeout-params-async"><code>turnToPoint(x, y, timeout, params, async)</code></h3>
+<p>Turns in-place to face a field coordinate.</p>
+<h3 id="swingtoheadingheading-side-timeout-params-async"><code>swingToHeading(heading, side, timeout, params, async)</code></h3>
+<p>Turns with only one side of the drivetrain, pivoting around the locked wheel.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">chassis</span><span class="p">.</span><span class="n">swingToHeading</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span><span class="w"> </span><span class="n">vortex</span><span class="o">::</span><span class="n">DriveSide</span><span class="o">::</span><span class="n">LEFT</span><span class="p">,</span><span class="w"> </span><span class="mi">1500</span><span class="p">);</span>
+</code></pre></div>
+<h3 id="followpath-lookahead-timeout-forwards-async"><code>follow(path, lookahead, timeout, forwards, async)</code></h3>
+<p>Pure Pursuit path following. <code>path</code> is a <code>ASSET()</code> macro pointing to a CSV file in <code>static/</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">ASSET</span><span class="p">(</span><span class="n">my_path_txt</span><span class="p">);</span><span class="w"> </span><span class="c1">// static/my_path.txt</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">chassis</span><span class="p">.</span><span class="n">follow</span><span class="p">(</span><span class="n">my_path_txt</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span><span class="w"> </span><span class="mi">5000</span><span class="p">);</span>
+</code></pre></div>
+<hr />
+<h2 id="tuning">Tuning</h2>
+<h3 id="tunelateraldist-timeout"><code>tuneLateral(dist, timeout)</code></h3>
+<p>Runs a lateral PID tuning motion and prints <code>TUNE_LAT: time,error,power</code> CSV to the terminal.</p>
+<h3 id="tuneangularheading-timeout"><code>tuneAngular(heading, timeout)</code></h3>
+<p>Runs an angular PID tuning motion and prints <code>TUNE_ANG: time,error,power</code> CSV.</p>
+<hr />
+<h2 id="driver-control">Driver Control</h2>
+<h3 id="tankleft-right-disabledrivecurve"><code>tank(left, right, disableDriveCurve)</code></h3>
+<h3 id="arcadethrottle-turn-disabledrivecurve-desaturatebias"><code>arcade(throttle, turn, disableDriveCurve, desaturateBias)</code></h3>
+<h3 id="curvaturethrottle-turn-disabledrivecurve"><code>curvature(throttle, turn, disableDriveCurve)</code></h3>
+<hr />
+<h2 id="waiting">Waiting</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">chassis</span><span class="p">.</span><span class="n">waitUntil</span><span class="p">(</span><span class="mi">12</span><span class="p">);</span><span class="w">             </span><span class="c1">// wait until 12 inches into the current motion</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">chassis</span><span class="p">.</span><span class="n">waitUntilPose</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span><span class="w">  </span><span class="c1">// wait until within 3 inches of (24, 24)</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">chassis</span><span class="p">.</span><span class="n">waitUntilDone</span><span class="p">();</span><span class="w">           </span><span class="c1">// wait until motion is fully complete</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">chassis</span><span class="p">.</span><span class="n">waitUntilDone</span><span class="p">(</span><span class="mi">2000</span><span class="p">);</span><span class="w">       </span><span class="c1">// same, but with a hard 2-second timeout</span>
+</code></pre></div>
+<hr />
+<h2 id="configuration">Configuration</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">chassis</span><span class="p">.</span><span class="n">setBrakeMode</span><span class="p">(</span><span class="n">pros</span><span class="o">::</span><span class="n">E_MOTOR_BRAKE_HOLD</span><span class="p">);</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">chassis</span><span class="p">.</span><span class="n">setStallDetection</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span><span class="w"> </span><span class="mi">250</span><span class="p">);</span><span class="w">       </span><span class="c1">// cancel if &lt; 10 RPM for 250 ms under load</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">chassis</span><span class="p">.</span><span class="n">setLogging</span><span class="p">(</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;/usd/log.csv&quot;</span><span class="p">);</span><span class="w">   </span><span class="c1">// SD card telemetry</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">chassis</span><span class="p">.</span><span class="n">setFieldRelative</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span><span class="w">             </span><span class="c1">// arcade always moves field-north</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="n">chassis</span><span class="p">.</span><span class="n">setImuDriftCompensation</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span><span class="w">      </span><span class="c1">// correct slow gyro creep</span>
+</code></pre></div>
+<hr />
+<h2 id="state">State</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">chassis</span><span class="p">.</span><span class="n">isInMotion</span><span class="p">()</span><span class="w">    </span><span class="c1">// true during any autonomous motion</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">chassis</span><span class="p">.</span><span class="n">isStalled</span><span class="p">()</span><span class="w">     </span><span class="c1">// true if stall was detected this motion</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">chassis</span><span class="p">.</span><span class="n">cancelMotion</span><span class="p">()</span><span class="w">  </span><span class="c1">// abort the running motion</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">chassis</span><span class="p">.</span><span class="n">cancelAllMotions</span><span class="p">()</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.instant", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
