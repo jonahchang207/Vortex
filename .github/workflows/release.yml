@@ -1,0 +1,38 @@
+name: PROS Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-template:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install ARM GNU Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi build-essential
+          
+      - name: Install PROS CLI
+        run: pip install pros-cli
+        
+      - name: Build Library Template
+        run: |
+          pros make template
+          
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: vortex@*.zip
