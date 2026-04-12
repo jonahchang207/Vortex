@@ -21,45 +21,47 @@ vortex::Chassis chassis({
 vortex::Piston wing('A');
 
 // Autonomous Selector (EZ-Template style)
-vortex::AutonSelector selector({
-    {"Red Left", "Score 2 balls on red left", []() {
-        // Example motion using new Boomerang algorithm
-        chassis.moveToPose(24, 24, 90, 2000);
+    {"Elite Routine", "Shows off motion chaining", []() {
+        // Move to (24, 24) but don't stop (chain to next point)
+        chassis.moveToPoint(24, 24, 2000, {.min_speed = 60});
+        // Transition smoothly to (48, 0)
+        chassis.moveToPoint(48, 0, 2000);
+        
+        // Use a relative distance wait to trigger a wing
+        chassis.turnToHeading(90, 1000, {.async = true});
+        chassis.waitUntilAngle(45); // Trigger at half-turn
         wing.extend();
     }},
-    {"Blue Right", "Score 2 balls on blue right", []() {
-        // Example motion using Pure Pursuit if path existed
-        // chassis.follow(myPath, 10, 3000);
-        chassis.moveToPoint(24, 0, 1500);
-    }}
 });
 
 void initialize() {
-    chassis.initialize(); // Calibrates IMU and starts odom task
-    selector.initialize(); // Creates brain screen GUI
+    chassis.initialize();
+    selector.initialize();
 }
 
 void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-    selector.run(); // Executes the selected routine
+    selector.run();
 }
 
 void opcontrol() {
     pros::Controller master(pros::E_CONTROLLER_MASTER);
-    vortex::ExpoDriveCurve drive_curve(5.0, 10.0, 1.05); // Smooth control
 
     while (true) {
         int forward = master.get_analog(ANALOG_LEFT_Y);
         int turn = master.get_analog(ANALOG_RIGHT_X);
         
-        // Use drive curve for better precision
-        chassis.arcade(drive_curve.calculate(forward), drive_curve.calculate(turn));
+        // Use Curvature drive for buttery smooth arcs
+        chassis.curvature(forward, turn);
         
         if (master.get_digital_new_press(DIGITAL_A)) {
             wing.toggle();
         }
+
+        // Telemetry for real-time tuning
+        vortex::Logger::telemetry("Throttle", forward);
 
         pros::delay(20);
     }

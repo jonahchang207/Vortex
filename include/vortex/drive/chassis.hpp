@@ -23,11 +23,11 @@ enum class AngularDirection {
 struct MoveToPointParams {
     bool forwards = true;
     int max_speed = 127;
-    int min_speed = 0;
-    double accel = 5.0; // Acceleration (0 to disable)
-    double decel = 5.0; // Deceleration (0 to disable)
+    int min_speed = 0; // For motion chaining
+    double accel = 5.0; // Slew rate
+    double decel = 5.0; // Profile decel
     double early_exit_range = 0;
-    bool async = true;
+    bool async = false;
 };
 
 struct MoveToPoseParams {
@@ -79,6 +79,11 @@ public:
     // --- Driver Control ---
     void tank(int left, int right, double curve = 0.0);
     void arcade(int forward, int turn, double curve = 0.0);
+    void curvature(int throttle, int turn, double curve = 0.0);
+    
+    // --- PTO Management ---
+    void setPTO(std::shared_ptr<pros::MotorGroup> left, std::shared_ptr<pros::MotorGroup> right);
+    void resetPTO();
     
     // --- Autonomous Motions ---
     void moveToPoint(double x, double y, int timeout, MoveToPointParams params = {});
@@ -108,10 +113,16 @@ public:
     Odom odom;
     PID linear_pid;
     PID angular_pid;
+    
+    double desaturate_bias = 0.5;
+    bool active_braking = false;
 
 private:
     ChassisConfig config;
-    bool is_moving = false;
+    std::shared_ptr<pros::MotorGroup> original_left;
+    std::shared_ptr<pros::MotorGroup> original_right;
+    
+    pros::Task* chassis_task = nullptr;
     double dist_to_target = 0;
     double angle_to_target = 0;
     

@@ -71,9 +71,19 @@ public:
     void start();
 
     /**
-     * @brief Gets current pose of the robot
+     * @brief Gets current position and heading
      */
-    Pose getPose() const;
+    Pose getPose(bool radians = false);
+
+    /**
+     * @brief Get the total distance traveled since odom start or reset
+     */
+    double getDistanceTraveled();
+
+    /**
+     * @brief Reset the distance traveled counter
+     */
+    void resetDistanceTraveled();
 
     /**
      * @brief Sets the pose of the robot manually
@@ -87,7 +97,8 @@ public:
 
 private:
     OdomConfig config;
-    Pose current_pose;
+    Pose pose;
+    double total_dist = 0;
     
     void update();
     friend void odom_task_fn(void* param);
