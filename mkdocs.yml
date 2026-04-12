@@ -25,9 +25,19 @@ theme:
 
 nav:
   - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Configuration: getting-started/configuration.md
+  - Tutorials:
+      - Driver Control: tutorials/driver-control.md
+      - Odometry Setup: tutorials/odometry-setup.md
+      - PID Tuning & Telemetry: tutorials/pid-tuning.md
+      - Motion Algorithms: tutorials/motion-algorithms.md
   - API Reference:
-    - Odom: odom.md
-    - Chassis: chassis.md
+      - Chassis: api/chassis.md
+      - Odometry: api/odom.md
+      - PID & Profiles: api/pid-profile.md
+      - Utilities: api/utils.md
 
 extra:
   social:

@@ -26,5 +26,25 @@ namespace math {
      * @brief Calculates Euclidean distance between two points
      */
     double dist(double x1, double y1, double x2, double y2);
+
+    /**
+     * @brief Calculate the signed curvature of a circle tangent to a pose and passing through a point
+     */
+    double getCurvature(Pose pose, double x, double y);
+
+    /**
+     * @brief Exponential Moving Average filter
+     */
+    class EMA {
+    public:
+        EMA(double alpha) : alpha(alpha) {}
+        double filter(double input) {
+            output = alpha * input + (1.0 - alpha) * output;
+            return output;
+        }
+    private:
+        double alpha;
+        double output = 0;
+    };
 } // namespace math
 } // namespace vortex

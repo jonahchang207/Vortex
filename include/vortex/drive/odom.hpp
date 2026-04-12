@@ -3,32 +3,64 @@
 #include "pros/imu.hpp"
 #include "pros/rotation.hpp"
 #include <memory>
+#include <vector>
 
 namespace vortex {
 
-struct TrackingWheel {
-    std::shared_ptr<pros::Rotation> encoder;
-    double wheel_diameter;
-    double offset; // distance from tracking center
-    
-    TrackingWheel(std::shared_ptr<pros::Rotation> enc, double diameter, double offset)
-        : encoder(enc), wheel_diameter(diameter), offset(offset) {}
-        
+/**
+ * @brief Represents a tracking wheel (encoder + wheel)
+ */
+class TrackingWheel {
+public:
+    /**
+     * @brief Construct a new Tracking Wheel object
+     * 
+     * @param port PROS port for rotation sensor
+     * @param wheel_diameter Diameter of the wheel in inches
+     * @param offset Distance from the tracking center (inches)
+     * @param gear_ratio Gear ratio (e.g. 1.0 for direct drive)
+     */
+    TrackingWheel(int8_t port, double wheel_diameter, double offset, double gear_ratio = 1.0);
+
+    /**
+     * @brief Get the distance traveled by the wheel in inches
+     */
     double getDistanceTraveled();
+
+    /**
+     * @brief Reset the sensor
+     */
     void reset();
+
+    /**
+     * @brief Get the offset from tracking center
+     */
+    double getOffset() const;
+
 private:
-    double last_position = 0;
+    pros::Rotation rotation;
+    double wheel_diameter;
+    double offset;
+    double gear_ratio;
+    double last_pos = 0;
 };
 
+/**
+ * @brief Configuration for Odometry sensors
+ */
 struct OdomConfig {
-    std::shared_ptr<TrackingWheel> left_encoder;
-    std::shared_ptr<TrackingWheel> right_encoder;
-    std::shared_ptr<TrackingWheel> back_encoder; // Perpendicular
-    std::shared_ptr<pros::Imu> imu;
-    
-    OdomConfig() : left_encoder(nullptr), right_encoder(nullptr), back_encoder(nullptr), imu(nullptr) {}
+    std::shared_ptr<TrackingWheel> vertical1 = nullptr;
+    std::shared_ptr<TrackingWheel> vertical2 = nullptr;
+    std::shared_ptr<TrackingWheel> horizontal1 = nullptr;
+    std::shared_ptr<TrackingWheel> horizontal2 = nullptr;
+    std::shared_ptr<pros::Imu> imu = nullptr;
+
+    OdomConfig() = default;
 };
 
+/**
+ * @brief Odometry class for tracking robot position
+ */
 class Odom {
 public:
     Odom(OdomConfig config);
@@ -47,6 +79,11 @@ public:
      * @brief Sets the pose of the robot manually
      */
     void setPose(Pose pose);
+
+    /**
+     * @brief Calibrates the IMU if present
+     */
+    void calibrate();
 
 private:
     OdomConfig config;

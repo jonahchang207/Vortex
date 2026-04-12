@@ -12,23 +12,17 @@ Vortex is a powerful Odometry and Motion Control template designed specifically 
 ## Quick Start
 ```cpp
 #include "main.h"
-#include "vortex/drive/chassis.hpp"
+#include "vortex/vortex.hpp" // High-level unified header
 
-// Setup your configuration
-vortex::OdomConfig odom_cfg;
-vortex::ChassisParams params = {
-    {0.5, 0.0, 0.1}, // Linear PID
-    {0.3, 0.0, 0.05} // Angular PID
-};
-
-vortex::Chassis chassis({nullptr, nullptr, 15.0, odom_cfg}, params);
+// Setup your configuration with just ports and track width
+vortex::Chassis chassis({1, 2, 3}, {-4, -5, -6}, 12.5);
 
 void initialize() {
-    chassis.initialize();
+    chassis.initialize(); // Starts background odometry
 }
 
 void autonomous() {
-    // Moves to coordinate (10, 20) with a 2000ms timeout going forward max speed 100
-    chassis.moveToPoint({10, 20}, 2000, true, 100);
+    // Moves to coordinate (10, 20) with a 2000ms timeout
+    chassis.moveToPoint({10, 20}, 2000);
 }
 ```

@@ -1,64 +1,126 @@
 #pragma once
 #include "vortex/drive/odom.hpp"
 #include "vortex/control/pid.hpp"
+#include "vortex/util/driveCurve.hpp"
+#include "vortex/util/asset.hpp"
 #include "pros/motor_group.hpp"
 #include <memory>
 
 namespace vortex {
 
+/**
+ * @brief Direction for turns
+ */
+enum class AngularDirection {
+    AUTO,
+    CW_CLOCKWISE,
+    CCW_COUNTERCLOCKWISE
+};
+
+/**
+ * @brief Parameters for Chassis movements
+ */
+struct MoveToPointParams {
+    bool forwards = true;
+    int max_speed = 127;
+    int min_speed = 0;
+    double accel = 5.0; // Acceleration (0 to disable)
+    double decel = 5.0; // Deceleration (0 to disable)
+    double early_exit_range = 0;
+    bool async = true;
+};
+
+struct MoveToPoseParams {
+    bool forwards = true;
+    double lead = 0.6; // Boomerang lead factor
+    int max_speed = 127;
+    int min_speed = 0;
+    double accel = 5.0; // Acceleration (0 to disable)
+    double decel = 5.0; // Deceleration (0 to disable)
+    double early_exit_range = 0;
+    bool async = true;
+};
+
+struct TurnParams {
+    AngularDirection direction = AngularDirection::AUTO;
+    int max_speed = 127;
+    int min_speed = 0;
+    double early_exit_range = 0;
+    bool async = true;
+};
+
+struct SwingParams {
+    bool left_side = true; // Which side to move (other is locked)
+    AngularDirection direction = AngularDirection::AUTO;
+    int max_speed = 127;
+    int min_speed = 0;
+    double early_exit_range = 0;
+    bool async = true;
+};
+
 struct ChassisConfig {
     std::shared_ptr<pros::MotorGroup> left_motors;
     std::shared_ptr<pros::MotorGroup> right_motors;
-    double track_width; // Distance between wheels
-    OdomConfig odom_config;
-};
-
-// PID constants for different movements
-struct ChassisParams {
-    PIDConstants linear_pid;
-    PIDConstants angular_pid;
+    double track_width;
+    double wheel_diameter;
+    double rpm;
+    OdomConfig odom_sensors;
 };
 
 class Chassis {
 public:
-    Chassis(ChassisConfig config, ChassisParams params);
+    Chassis(ChassisConfig config);
 
+    /**
+     * @brief Setup the chassis (start odom, etc.)
+     */
     void initialize();
 
-    // --- Control methods ---
+    // --- Driver Control ---
     void tank(int left, int right, double curve = 0.0);
     void arcade(int forward, int turn, double curve = 0.0);
-
-    // --- Autonomous methods ---
     
-    /**
-     * @brief Move to a target point (x, y)
-     * @param target Target pose (coordinates)
-     * @param timeout Timeout in milliseconds
-     * @param forward True to drive forward, false to drive backward (default true)
-     * @param max_speed Maximum speed (0 to 127) (default 127)
-     * @param min_speed Minimum speed (0 to 127) (default 0)
-     */
-    void moveToPoint(Pose target, int timeout, bool forward = true, int max_speed = 127, int min_speed = 0);
+    // --- Autonomous Motions ---
+    void moveToPoint(double x, double y, int timeout, MoveToPointParams params = {});
+    void moveToPose(double x, double y, double theta, int timeout, MoveToPoseParams params = {});
+    void turnToHeading(double theta, int timeout, TurnParams params = {});
+    void turnToPoint(double x, double y, int timeout, TurnParams params = {});
+    void swingToHeading(double theta, int timeout, SwingParams params = {});
+    void swingToPoint(double x, double y, int timeout, SwingParams params = {});
+    void follow(Asset path, double lookahead, int timeout, bool forwards = true, bool async = true);
+
+    // --- Wait Helpers ---
+    void waitUntilDist(double inches);
+    void waitUntilAngle(double degrees);
+    void waitUntilSettled();
 
     /**
-     * @brief Turn to a specific heading
-     * @param angle Expected angle in degrees
-     * @param timeout Timeout in milliseconds
-     * @param max_speed Maximum speed (default 127)
-     * @param min_speed Minimum speed (default 0)
+     * @brief Wait until the current movement is finished
      */
-    void turnToHeading(double angle, int timeout, int max_speed = 127, int min_speed = 0);
+    void waitUntilDone();
 
-    // Access to underlying Odom
+    /**
+     * @brief Sets the brake mode of the drive motors
+     */
+    void setBrakeMode(pros::motor_brake_mode_e mode);
+
+    // Access to underlying components
     Odom odom;
+    PID linear_pid;
+    PID angular_pid;
 
 private:
     ChassisConfig config;
-    ChassisParams params;
+    bool is_moving = false;
+    double dist_to_target = 0;
+    double angle_to_target = 0;
     
-    // Internal helper to apply deadband/curve
-    int applyCurve(int input, double curve);
+    // Default PIDs (will be updated by user)
+    static PIDSettings default_linear_settings;
+    static PIDSettings default_angular_settings;
+
+    void movement_task(void* param);
+    friend void chassis_task_fn(void* param);
 };
 
 } // namespace vortex
