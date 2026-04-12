@@ -4,10 +4,15 @@ site_author: Jonah Chang
 
 theme:
   name: material
+  logo: logo.svg
   features:
     - navigation.tabs
     - navigation.sections
+    - navigation.top
+    - navigation.tracking
     - toc.integrate
+    - content.code.copy
+    - content.code.annotate
   palette:
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
@@ -23,3 +28,8 @@ nav:
   - API Reference:
     - Odom: odom.md
     - Chassis: chassis.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/jonahchang207/Vortex
