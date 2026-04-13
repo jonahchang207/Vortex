@@ -31,11 +31,16 @@ jobs:
         run: |
           pros make template
           
-      - name: Upload Release Asset
+      - name: Package Example Project
+        run: zip -r vortex-example.zip example/
+
+      - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: vortex@*.zip
+          files: |
+            vortex@*.zip
+            vortex-example.zip
           
       - name: Update Depot Branch
         if: startsWith(github.ref, 'refs/tags/')

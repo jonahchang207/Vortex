@@ -16,3 +16,4 @@ temp.log
 temp.errors
 *.ini
 .d/
+site/
