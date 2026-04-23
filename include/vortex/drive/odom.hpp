@@ -15,17 +15,22 @@ public:
     /**
      * @brief Construct a new Tracking Wheel object
      * 
-     * @param port PROS port for rotation sensor
+     * @param rotation Shared pointer to PROS rotation sensor
      * @param wheel_diameter Diameter of the wheel in inches
      * @param offset Distance from the tracking center (inches)
      * @param gear_ratio Gear ratio (e.g. 1.0 for direct drive)
      */
-    TrackingWheel(int8_t port, double wheel_diameter, double offset, double gear_ratio = 1.0);
+    TrackingWheel(std::shared_ptr<pros::Rotation> rotation, double wheel_diameter, double offset, double gear_ratio = 1.0);
 
     /**
      * @brief Get the distance traveled by the wheel in inches
      */
     double getDistanceTraveled();
+
+    /**
+     * @brief Get the current total distance in inches (for odom internal use)
+     */
+    double getDistance() const;
 
     /**
      * @brief Reset the sensor
@@ -38,24 +43,21 @@ public:
     double getOffset() const;
 
 private:
-    pros::Rotation rotation;
+    std::shared_ptr<pros::Rotation> rotation;
     double wheel_diameter;
     double offset;
     double gear_ratio;
-    double last_pos = 0;
 };
 
 /**
  * @brief Configuration for Odometry sensors
  */
 struct OdomConfig {
-    std::shared_ptr<TrackingWheel> vertical1 = nullptr;
-    std::shared_ptr<TrackingWheel> vertical2 = nullptr;
-    std::shared_ptr<TrackingWheel> horizontal1 = nullptr;
-    std::shared_ptr<TrackingWheel> horizontal2 = nullptr;
+    std::shared_ptr<TrackingWheel> left_encoder = nullptr;
+    std::shared_ptr<TrackingWheel> right_encoder = nullptr;
+    std::shared_ptr<TrackingWheel> back_encoder = nullptr;
+    std::shared_ptr<TrackingWheel> front_encoder = nullptr;
     std::shared_ptr<pros::Imu> imu = nullptr;
-
-    OdomConfig() = default;
 };
 
 /**

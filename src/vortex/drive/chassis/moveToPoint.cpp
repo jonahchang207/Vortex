@@ -1,5 +1,6 @@
 #include "vortex/drive/chassis.hpp"
 #include "vortex/util/math.hpp"
+#include "vortex/util/timer.hpp"
 #include <cmath>
 
 namespace vortex {
@@ -14,16 +15,16 @@ void Chassis::moveToPoint(double x, double y, int timeout, MoveToPointParams par
     linear_pid.reset();
     angular_pid.reset();
 
-    while (timer.getTime() < timeout) {
+    while (timer.getElapsed() < (uint32_t)timeout) {
         Pose pose = odom.getPose();
-        double distance = dist(pose.x, pose.y, x, y);
+        double distance = math::dist(pose.x, pose.y, x, y);
         double angle = std::atan2(y - pose.y, x - pose.x);
 
         if (!params.forwards) angle += M_PI;
-        double angle_error = wrapAngle(angle - pose.theta);
+        double angle_error = math::wrapAngle(angle - pose.theta);
 
         double linear_power = linear_pid.update(distance);
-        double angular_power = angular_pid.update(std::to_string(angle_error)); // Hypothetical wrapper
+        double angular_power = angular_pid.update(angle_error);
 
         // Exit conditions
         if (linear_pid.isSettled(distance) || (params.min_speed > 0 && std::abs(linear_power) < params.min_speed)) {

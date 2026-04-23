@@ -11,7 +11,7 @@ AutonSelector::AutonSelector(std::vector<Auton> routines) : routines(routines) {
 }
 
 void AutonSelector::alliance_toggle_handler(lv_event_t* e) {
-    lv_obj_t* btn = lv_event_get_target(e);
+    lv_obj_t* btn = (lv_obj_t*)lv_event_get_target(e);
     if (!current_selector) return;
 
     if (current_selector->selected_alliance == Alliance::RED) {
@@ -27,11 +27,11 @@ void AutonSelector::alliance_toggle_handler(lv_event_t* e) {
 
 void AutonSelector::initialize() {
     // Parent object for the whole screen
-    lv_obj_t* screen = lv_scr_act();
+    lv_obj_t* screen = lv_screen_active();
     lv_obj_clean(screen);
 
     // Alliance Toggle Button
-    lv_obj_t* alliance_btn = lv_btn_create(screen);
+    lv_obj_t* alliance_btn = lv_button_create(screen);
     lv_obj_set_size(alliance_btn, 160, 40);
     lv_obj_align(alliance_btn, LV_ALIGN_TOP_RIGHT, -10, 10);
     lv_obj_set_style_bg_color(alliance_btn, lv_palette_main(LV_PALETTE_RED), 0);
@@ -43,7 +43,9 @@ void AutonSelector::initialize() {
     lv_obj_add_event_cb(alliance_btn, alliance_toggle_handler, LV_EVENT_CLICKED, nullptr);
 
     // Routine Tabs
-    lv_obj_t* tv = lv_tabview_create(screen, LV_DIR_LEFT, 100);
+    lv_obj_t* tv = lv_tabview_create(screen);
+    lv_tabview_set_tab_bar_position(tv, LV_DIR_LEFT);
+    lv_tabview_set_tab_bar_size(tv, 100);
     lv_obj_set_size(tv, 480, 240);
     lv_obj_align(tv, LV_ALIGN_BOTTOM_LEFT, 0, 0);
     
@@ -59,10 +61,10 @@ void AutonSelector::initialize() {
     }
 
     lv_obj_add_event_cb(tv, [](lv_event_t* e) {
-        lv_obj_t* tv = lv_event_get_target(e);
+        lv_obj_t* tv = (lv_obj_t*)lv_event_get_target(e);
         if (lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED) {
             if (current_selector) {
-                current_selector->selected_index = lv_tabview_get_tab_act(tv);
+                current_selector->selected_index = lv_tabview_get_tab_active(tv);
             }
         }
     }, LV_EVENT_VALUE_CHANGED, nullptr);

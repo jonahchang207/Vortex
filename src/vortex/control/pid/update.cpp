@@ -8,9 +8,9 @@ double PID::update(double error) {
     integral += error;
 
     // Integral Anti-Windup
-    if (std::abs(error) > settings.i_max) integral = 0;
+    if (settings.windup_range > 0 && std::abs(error) > settings.windup_range) integral = 0;
 
-    double output = (error * settings.kp) + (integral * settings.ki) + (derivative * settings.kd);
+    double output = (error * settings.kP) + (integral * settings.kI) + (derivative * settings.kD);
     
     // Slew Rate
     if (settings.slew > 0) {

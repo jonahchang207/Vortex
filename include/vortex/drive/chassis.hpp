@@ -18,6 +18,14 @@ enum class AngularDirection {
 };
 
 /**
+ * @brief Side of the drive for swing turns
+ */
+enum class DriveSide {
+    LEFT,
+    RIGHT
+};
+
+/**
  * @brief Parameters for Chassis movements
  */
 struct MoveToPointParams {
@@ -64,12 +72,17 @@ struct ChassisConfig {
     double track_width;
     double wheel_diameter;
     double rpm;
-    OdomConfig odom_sensors;
+    OdomConfig odom_config;
+};
+
+struct ChassisParams {
+    PIDSettings linear_pid;
+    PIDSettings angular_pid;
 };
 
 class Chassis {
 public:
-    Chassis(ChassisConfig config);
+    Chassis(ChassisConfig config, ChassisParams params);
 
     /**
      * @brief Setup the chassis (start odom, etc.)
@@ -90,8 +103,8 @@ public:
     void moveToPose(double x, double y, double theta, int timeout, MoveToPoseParams params = {});
     void turnToHeading(double theta, int timeout, TurnParams params = {});
     void turnToPoint(double x, double y, int timeout, TurnParams params = {});
-    void swingToHeading(double theta, int timeout, SwingParams params = {});
-    void swingToPoint(double x, double y, int timeout, SwingParams params = {});
+    void swingToHeading(double theta, DriveSide side, int timeout, SwingParams params = {});
+    void swingToPoint(double x, double y, DriveSide side, int timeout, SwingParams params = {});
     void follow(Asset path, double lookahead, int timeout, bool forwards = true, bool async = true);
 
     // --- Wait Helpers ---

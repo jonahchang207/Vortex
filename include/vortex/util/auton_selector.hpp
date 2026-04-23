@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include "liblvgl/lvgl.h"
 
 namespace vortex {
 

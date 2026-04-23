@@ -5,7 +5,7 @@
 namespace vortex {
 
 void Chassis::waitUntilAngle(double degrees) {
-    while (std::abs(angular_pid.getError()) > degrees) {
+    while (std::abs(math::wrapAngleDeg(angle_to_target)) > degrees) {
         pros::delay(10);
     }
 }

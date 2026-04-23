@@ -13,6 +13,10 @@ struct Asset {
     size_t size;
     
     Asset(const uint8_t* data, size_t size) : data(data), size(size) {}
+
+    // Placeholders for Pure Pursuit
+    Pose getPoint(int index) { return {0, 0, 0}; }
+    Pose lastPoint() { return {0, 0, 0}; }
 };
 
 /**

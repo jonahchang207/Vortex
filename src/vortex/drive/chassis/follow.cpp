@@ -1,5 +1,6 @@
 #include "vortex/drive/chassis.hpp"
 #include "vortex/util/math.hpp"
+#include "vortex/util/timer.hpp"
 
 namespace vortex {
 
@@ -7,7 +8,7 @@ void Chassis::follow(Asset path, double lookahead, int timeout, bool forwards, b
     if (async) return;
 
     Timer timer;
-    while (timer.getTime() < timeout) {
+    while (timer.getElapsed() < (uint32_t)timeout) {
         Pose pose = odom.getPose();
         
         // Pure Pursuit implementation (finding lookahead point on path)
@@ -15,7 +16,7 @@ void Chassis::follow(Asset path, double lookahead, int timeout, bool forwards, b
         double target_x = path.getPoint(0).x; // Placeholder
         double target_y = path.getPoint(0).y;
 
-        double curvature = getCurvature(pose, target_x, target_y);
+        double curvature = math::getCurvature(pose, target_x, target_y);
         double throttle = 127; // Max speed for pursuit
 
         // Steering desaturation logic applied here as well
@@ -25,7 +26,7 @@ void Chassis::follow(Asset path, double lookahead, int timeout, bool forwards, b
         config.left_motors->move(left);
         config.right_motors->move(right);
 
-        if (dist(pose.x, pose.y, path.lastPoint().x, path.lastPoint().y) < lookahead) {
+        if (math::dist(pose.x, pose.y, path.lastPoint().x, path.lastPoint().y) < lookahead) {
             break;
         }
 

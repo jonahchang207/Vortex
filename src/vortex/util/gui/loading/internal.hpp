@@ -1,5 +1,5 @@
 #pragma once
-#include "display/lvgl.h"
+#include "liblvgl/lvgl.h"
 
 namespace vortex {
 namespace gui {

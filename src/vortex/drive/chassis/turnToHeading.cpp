@@ -1,5 +1,6 @@
 #include "vortex/drive/chassis.hpp"
 #include "vortex/util/math.hpp"
+#include "vortex/util/timer.hpp"
 
 namespace vortex {
 
@@ -9,9 +10,9 @@ void Chassis::turnToHeading(double theta, int timeout, TurnParams params) {
     Timer timer;
     angular_pid.reset();
 
-    while (timer.getTime() < timeout) {
+    while (timer.getElapsed() < (uint32_t)timeout) {
         Pose pose = odom.getPose();
-        double error = wrapAngleDeg(theta - pose.theta);
+        double error = math::wrapAngleDeg(theta - pose.theta);
         
         // Handle explicit directions (CW/CCW)
         if (params.direction == AngularDirection::CW_CLOCKWISE && error < 0) error += 360;

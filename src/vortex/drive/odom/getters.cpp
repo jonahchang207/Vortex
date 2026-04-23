@@ -4,7 +4,7 @@ namespace vortex {
 
 Pose Odom::getPose(bool radians) {
     Pose p = pose;
-    if (radians) p.theta = p.theta * M_PI / 180.0;
+    if (radians) p.theta = p.theta * 3.141592653589793 / 180.0;
     return p;
 }
 
