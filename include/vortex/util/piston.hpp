@@ -58,7 +58,7 @@ public:
     }
 
 private:
-    pros::ADIDigitalOut piston;
+    pros::adi::DigitalOut piston;
     bool state;
 };
 

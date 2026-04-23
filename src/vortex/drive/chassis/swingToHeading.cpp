@@ -1,17 +1,18 @@
 #include "vortex/drive/chassis.hpp"
 #include "vortex/util/math.hpp"
+#include "vortex/util/timer.hpp"
 
 namespace vortex {
 
-void Chassis::swingToHeading(double theta, DriveSide lockedSide, int timeout, SwingParams params) {
+void Chassis::swingToHeading(double theta, DriveSide side, int timeout, SwingParams params) {
     if (params.async) return;
 
     Timer timer;
     angular_pid.reset();
 
-    while (timer.getTime() < timeout) {
+    while (timer.getElapsed() < (uint32_t)timeout) {
         Pose pose = odom.getPose();
-        double error = wrapAngleDeg(theta - pose.theta);
+        double error = math::wrapAngleDeg(theta - pose.theta);
         
         if (params.direction == AngularDirection::CW_CLOCKWISE && error < 0) error += 360;
         if (params.direction == AngularDirection::CCW_COUNTERCLOCKWISE && error > 0) error -= 360;
@@ -20,7 +21,7 @@ void Chassis::swingToHeading(double theta, DriveSide lockedSide, int timeout, Sw
         
         if (angular_pid.isSettled(error)) break;
 
-        if (lockedSide == DriveSide::LEFT) {
+        if (side == DriveSide::LEFT) {
             config.left_motors->move(0);
             config.right_motors->move(-power); // Turning right moves right motors back
         } else {

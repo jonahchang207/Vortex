@@ -10,11 +10,11 @@ lv_obj_t* progress_bar = nullptr;
 
 void show_loading_screen() {
     loading_scr = lv_obj_create(nullptr);
-    lv_scr_load(loading_scr);
+    lv_screen_load(loading_scr);
 
     // Create Logo (Placeholder for the generated image)
     // In a real project, the user would convert 'vortex_logo_npr.png' to a C array
-    logo_img = lv_img_create(loading_scr);
+    logo_img = lv_image_create(loading_scr);
     lv_obj_center(logo_img);
     lv_obj_set_y(logo_img, -20);
 

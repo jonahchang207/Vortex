@@ -8,17 +8,17 @@ void Chassis::initialize() {
     gui::show_loading_screen();
     
     // Start IMU Calibration
-    if (config.odom_sensors.imu) {
-        config.odom_sensors.imu->reset();
+    if (config.odom_config.imu) {
+        config.odom_config.imu->reset();
     }
 
     // Monitoring Loop
     int timeout = 0;
-    while (config.odom_sensors.imu && config.odom_sensors.imu->is_calibrating()) {
+    while (config.odom_config.imu && config.odom_config.imu->is_calibrating()) {
         gui::update_loading_bar((timeout / 3000.0) * 100); // Faked % based on typical 3s
         
         // Error Check
-        if (config.odom_sensors.imu->get_status() & 0x01) { // Error flag
+        if (static_cast<int>(config.odom_config.imu->get_status()) & 0x01) { // Error flag
              gui::show_loading_error();
              // Continuously vibrate as requested
              while(true) {

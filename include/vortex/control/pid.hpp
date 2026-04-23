@@ -12,6 +12,8 @@ struct PIDSettings {
     double slew = 0;         // Max acceleration (0 to disable)
 };
 
+using PIDConstants = PIDSettings;
+
 class PID {
 public:
     PID(double kP, double kI, double kD);
@@ -34,6 +36,7 @@ public:
 
     void setSettings(PIDSettings settings);
     void setExitCondition(ExitCondition exit_condition);
+    double getError() const { return prev_error; }
 
 private:
     PIDSettings settings;
