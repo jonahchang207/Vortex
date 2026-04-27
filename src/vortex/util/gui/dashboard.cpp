@@ -23,7 +23,7 @@ void Dashboard::initialize() {
     lv_obj_set_style_bg_opa(main_cont, 0, 0);
     lv_obj_set_style_border_width(main_cont, 0, 0);
     lv_obj_set_style_pad_all(main_cont, 0, 0);
-    lv_obj_clear_flag(main_cont, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_remove_flag(main_cont, LV_OBJ_FLAG_SCROLLABLE);
 
     create_selector_panel(main_cont);
     create_telemetry_panel(main_cont);
