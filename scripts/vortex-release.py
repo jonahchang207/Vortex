@@ -36,7 +36,7 @@ VORTEX_ASCII = r"""
 # --- Configuration & Branches ---
 STABLE_BRANCH = "stable"
 DEV_BRANCH = "dev"
-PROD_PATHS = ["src/", "include/", "example/", "firmware/", "Makefile", "common.mk", "project.pros", "LICENSE", "README.md", ".gitignore"]
+PROD_PATHS = ["src/", "include/", "example/", "firmware/", "Makefile", "common.mk", "project.pros", "LICENSE", "README.md", ".gitignore", "scripts/"]
 
 class VersionManager:
     def __init__(self, file_path="Makefile"):
@@ -75,10 +75,36 @@ class VersionManager:
 
 class ProcessManager:
     @staticmethod
+    def get_pros_cmd():
+        # Check if 'pros' is in PATH
+        try:
+            if subprocess.run(["which", "pros"], capture_output=True).returncode == 0:
+                return "pros"
+        except:
+            pass
+        
+        # Check common locations
+        common_paths = [
+            os.path.expanduser("~/Library/Python/3.9/bin/pros"),
+            os.path.expanduser("~/Library/Python/3.8/bin/pros"),
+            "/usr/local/bin/pros",
+            "/opt/homebrew/bin/pros",
+        ]
+        for path in common_paths:
+            if os.path.exists(path):
+                return path
+        
+        return "pros" # Fallback to name and let it fail if not found
+
+    @staticmethod
     def run(cmd, description, dry_run=False, capture=True):
         if dry_run:
             console.print(rf"[warning]\[DRY RUN][/warning] Would run: [info]{' '.join(cmd)}[/info]")
             return True
+        
+        # Inject full path for 'pros' if it's the first element
+        if cmd and cmd[0] == "pros":
+            cmd[0] = ProcessManager.get_pros_cmd()
         
         try:
             subprocess.run(cmd, check=True, capture_output=capture, text=True)
