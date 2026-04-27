@@ -218,6 +218,9 @@ def main(major, minor, patch, version, dry_run, no_push):
         pros_path = ProcessManager.get_pros_cmd()
         env["pros"] = pros_path
         
+        toolchain_path = os.path.expanduser("~") + "/Library/Application Support/Code/User/globalStorage/sigbots.pros/install/pros-toolchain-macos/bin"
+        env["PATH"] = f"{toolchain_path}:{env.get('PATH', '')}"
+        
         if os.path.isabs(pros_path):
             pros_dir = os.path.dirname(pros_path)
             env["PATH"] = f"{pros_dir}:{env.get('PATH', '')}"

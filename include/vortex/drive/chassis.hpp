@@ -122,6 +122,9 @@ public:
      */
     void setBrakeMode(pros::motor_brake_mode_e mode);
 
+    double getTargetX() const { return target_x; }
+    double getTargetY() const { return target_y; }
+
     // Access to underlying components
     Odom odom;
     PID linear_pid;
