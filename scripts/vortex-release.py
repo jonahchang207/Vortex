@@ -23,7 +23,7 @@ VORTEX_THEME = Theme({
 
 console = Console(theme=VORTEX_THEME)
 
-VORTEX_ASCII = """
+VORTEX_ASCII = r"""
 [brand] __      __  ____   _____   _______  ______  __   __ [/brand]
 [brand] \ \    / / / __ \ |  __ \ |__   __||  ____| \ \ / / [/brand]
 [brand]  \ \  / / | |  | || |__) |   | |   | |__     \ V /  [/brand]
@@ -77,7 +77,7 @@ class ProcessManager:
     @staticmethod
     def run(cmd, description, dry_run=False, capture=True):
         if dry_run:
-            console.print(f"[warning]\[DRY RUN][/warning] Would run: [info]{' '.join(cmd)}[/info]")
+            console.print(rf"[warning]\[DRY RUN][/warning] Would run: [info]{' '.join(cmd)}[/info]")
             return True
         
         try:
