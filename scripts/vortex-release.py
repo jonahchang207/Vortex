@@ -206,10 +206,21 @@ def main(major, minor, patch, version, dry_run, no_push):
     # 3. Build Template (on stable)
     with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
         task = progress.add_task(description="Building PROS template...", total=None)
-        if not ProcessManager.run(["pros", "make", "template"], "PROS build", dry_run):
+        
+        # We pass PROS path to make via environment variable to handle Makefile calls
+        env = os.environ.copy()
+        pros_path = ProcessManager.get_pros_cmd()
+        env["pros"] = pros_path
+        
+        try:
+            subprocess.run([pros_path, "make", "template"], check=True, capture_output=True, text=True, env=env)
+        except subprocess.CalledProcessError as e:
+            console.print("[error]Error during PROS build:[/error]")
+            console.print(e.stderr)
             # Try to return to dev before exit
             ProcessManager.run(["git", "checkout", DEV_BRANCH], "cleanup checkout dev", False)
             sys.exit(1)
+            
         progress.update(task, completed=True, description="PROS template built!")
 
     # 4. Tag and Push
