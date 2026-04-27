@@ -85,11 +85,18 @@ class ProcessManager:
         
         # Check common locations
         common_paths = [
-            os.path.expanduser("~/Library/Python/3.9/bin/pros"),
-            os.path.expanduser("~/Library/Python/3.8/bin/pros"),
             "/usr/local/bin/pros",
             "/opt/homebrew/bin/pros",
         ]
+        
+        # Add user-specific paths
+        user_home = os.path.expanduser(f"~{os.environ.get('SUDO_USER', '')}")
+        common_paths.extend([
+            os.path.join(user_home, "Library/Python/3.9/bin/pros"),
+            os.path.join(user_home, "Library/Python/3.8/bin/pros"),
+            os.path.join(user_home, ".local/bin/pros"),
+        ])
+
         for path in common_paths:
             if os.path.exists(path):
                 return path
