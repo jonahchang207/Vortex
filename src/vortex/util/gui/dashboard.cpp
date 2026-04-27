@@ -157,8 +157,8 @@ void Dashboard::update() {
 
     // Update Target
     // We'll use NaN or a very large number to indicate no target
-    if (std::abs(chassis.target_x) < 10000) {
-        std::snprintf(buf, sizeof(buf), "X: %.2f  Y: %.2f", chassis.target_x, chassis.target_y);
+    if (std::abs(chassis.getTargetX()) < 10000) {
+        std::snprintf(buf, sizeof(buf), "X: %.2f  Y: %.2f", chassis.getTargetX(), chassis.getTargetY());
     } else {
         std::snprintf(buf, sizeof(buf), "X: ---  Y: ---");
     }
