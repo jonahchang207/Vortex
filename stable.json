@@ -1,0 +1,12 @@
+[
+  {
+    "metadata": {
+      "location": "https://github.com/jonahchang207/Vortex/releases/download/v0.0.5/vortex@0.0.5.zip"
+    },
+    "name": "vortex",
+    "py/object": "pros.conductor.templates.base_template.BaseTemplate",
+    "supported_kernels": "^4.0.0",
+    "target": "v5",
+    "version": "0.0.5"
+  }
+]

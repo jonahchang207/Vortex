@@ -6,7 +6,7 @@ namespace vortex {
 
 void Chassis::turnToPoint(double x, double y, int timeout, TurnParams params) {
     Pose pose = odom.getPose();
-    double angle = std::atan2(y - pose.y, x - pose.x) * 180.0 / M_PI;
+    double angle = pose.angleTo(Pose(x, y));
     turnToHeading(angle, timeout, params);
 }
 

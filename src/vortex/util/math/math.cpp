@@ -10,8 +10,8 @@ double dist(double x1, double y1, double x2, double y2) {
 }
 
 double getCurvature(Pose pose, double x, double y) {
-    // Convert heading to standard math (CCW radians, 0 is east)
-    double heading_rad = pose.theta * DEG_TO_RAD;
+    // Convert heading from 0=North CW to standard math (CCW radians, 0 is east)
+    double heading_rad = (90.0 - pose.theta) * DEG_TO_RAD;
     
     // Side of the line (using the heading vector)
     double side = std::sin(heading_rad) * (x - pose.x) - std::cos(heading_rad) * (y - pose.y);

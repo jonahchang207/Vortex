@@ -65,18 +65,37 @@ Vortex is designed to **meet or exceed** the functionality of industry-standard 
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Ultimate Installation (Depot)
 
-### 1. Install
+For the easiest experience, add the Vortex depot to your PROS environment. This allows you to install and update Vortex with a single command.
 
+### 1. Add the Depot
+Run this once to link Vortex to your PROS CLI:
 ```bash
-# Create a PROS project
-prosv5 conduct create ./my-robot
-
-# Copy the Vortex folders into your project
-# include/vortex/  →  your project's include/
-# src/vortex/      →  your project's src/
+pros c add-depot Vortex https://raw.githubusercontent.com/jonahchang207/Vortex/depot/stable.json
 ```
+
+### 2. Install Vortex
+In your project directory, run:
+```bash
+pros c apply vortex
+```
+
+### 3. Update Vortex
+To get the latest version later:
+```bash
+pros c apply vortex --update
+```
+
+---
+
+## 🛠 Manual Installation
+If you prefer not to use the depot:
+1. Download the latest `vortex@x.x.x.zip` from the [Releases](https://github.com/jonahchang207/Vortex/releases) page.
+2. In your project directory, run:
+   ```bash
+   pros c apply vortex@x.x.x.zip
+   ```
 
 ### 2. Configure
 
