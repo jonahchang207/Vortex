@@ -110,11 +110,16 @@ class ProcessManager:
             return True
         
         # Inject full path for 'pros' if it's the first element
+        env = os.environ.copy()
         if cmd and cmd[0] == "pros":
-            cmd[0] = ProcessManager.get_pros_cmd()
+            pros_path = ProcessManager.get_pros_cmd()
+            cmd[0] = pros_path
+            if os.path.isabs(pros_path):
+                pros_dir = os.path.dirname(pros_path)
+                env["PATH"] = f"{pros_dir}:{env.get('PATH', '')}"
         
         try:
-            subprocess.run(cmd, check=True, capture_output=capture, text=True)
+            subprocess.run(cmd, check=True, capture_output=capture, text=True, env=env)
             return True
         except subprocess.CalledProcessError as e:
             console.print(f"[error]Error during {description}:[/error]")
@@ -208,9 +213,14 @@ def main(major, minor, patch, version, dry_run, no_push):
         task = progress.add_task(description="Building PROS template...", total=None)
         
         # We pass PROS path to make via environment variable to handle Makefile calls
+        # AND we update PATH so sub-shells can find 'pros'
         env = os.environ.copy()
         pros_path = ProcessManager.get_pros_cmd()
         env["pros"] = pros_path
+        
+        if os.path.isabs(pros_path):
+            pros_dir = os.path.dirname(pros_path)
+            env["PATH"] = f"{pros_dir}:{env.get('PATH', '')}"
         
         try:
             subprocess.run([pros_path, "make", "template"], check=True, capture_output=True, text=True, env=env)
