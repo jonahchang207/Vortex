@@ -47,6 +47,7 @@ private:
     double wheel_diameter;
     double offset;
     double gear_ratio;
+    double last_dist = 0;
 };
 
 /**
@@ -101,6 +102,7 @@ private:
     OdomConfig config;
     Pose pose;
     double total_dist = 0;
+    double last_imu_heading = 0;
     
     void update();
     friend void odom_task_fn(void* param);

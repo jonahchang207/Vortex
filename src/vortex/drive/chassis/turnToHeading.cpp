@@ -7,6 +7,9 @@ namespace vortex {
 void Chassis::turnToHeading(double theta, int timeout, TurnParams params) {
     if (params.async) return;
 
+    target_x = 99999;
+    target_y = 99999;
+
     Timer timer;
     angular_pid.reset();
 
@@ -18,6 +21,7 @@ void Chassis::turnToHeading(double theta, int timeout, TurnParams params) {
         if (params.direction == AngularDirection::CW_CLOCKWISE && error < 0) error += 360;
         if (params.direction == AngularDirection::CCW_COUNTERCLOCKWISE && error > 0) error -= 360;
 
+        angle_to_target = error;
         double power = angular_pid.update(error);
         
         if (angular_pid.isSettled(error)) break;

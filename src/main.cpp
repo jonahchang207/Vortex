@@ -22,10 +22,12 @@ vortex::Chassis chassis(
         .angular_pid = {.kP = 4.0, .kI = 0, .kD = 0.5}
     }
 );
+#include "main.h"
+#include "vortex/vortex.hpp"
+#include "vortex/util/gui/dashboard.hpp"
 
-// Piston for an intake or wing (EZ-Template style)
-vortex::Piston wing('A');
-
+// Motor definitions
+...
 // Autonomous Selector (EZ-Template style)
 vortex::AutonSelector selector({
     {"Elite Routine", "Shows off motion chaining", []() {
@@ -33,7 +35,7 @@ vortex::AutonSelector selector({
         chassis.moveToPoint(24, 24, 2000, {.min_speed = 60});
         // Transition smoothly to (48, 0)
         chassis.moveToPoint(48, 0, 2000);
-        
+
         // Use a relative distance wait to trigger a wing
         chassis.turnToHeading(90, 1000, {.async = true});
         chassis.waitUntilAngle(45); // Trigger at half-turn
@@ -41,11 +43,20 @@ vortex::AutonSelector selector({
     }},
 });
 
+vortex::Dashboard dashboard(chassis, selector);
+
 void initialize() {
     chassis.initialize();
-    selector.initialize();
-}
+    dashboard.initialize();
 
+    // Background task to update dashboard
+    pros::Task dashboard_task([&]() {
+        while (true) {
+            dashboard.update();
+            pros::delay(50);
+        }
+    });
+}
 void disabled() {}
 void competition_initialize() {}
 

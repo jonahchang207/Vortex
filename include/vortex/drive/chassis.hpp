@@ -138,6 +138,8 @@ private:
     pros::Task* chassis_task = nullptr;
     double dist_to_target = 0;
     double angle_to_target = 0;
+    double target_x = 0;
+    double target_y = 0;
     
     // Default PIDs (will be updated by user)
     static PIDSettings default_linear_settings;

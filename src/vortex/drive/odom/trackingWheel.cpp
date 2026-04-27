@@ -8,6 +8,7 @@ TrackingWheel::TrackingWheel(std::shared_ptr<pros::Rotation> rotation, double wh
 
 void TrackingWheel::reset() {
     if (rotation) rotation->reset_position();
+    last_dist = 0;
 }
 
 double TrackingWheel::getDistance() const {
@@ -18,7 +19,6 @@ double TrackingWheel::getDistance() const {
 }
 
 double TrackingWheel::getDistanceTraveled() {
-    static double last_dist = 0;
     double current_dist = getDistance();
     double delta = current_dist - last_dist;
     last_dist = current_dist;

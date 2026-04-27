@@ -12,6 +12,12 @@ void odom_task_fn(void* param) {
 }
 
 void Odom::start() {
+    if (config.imu) last_imu_heading = config.imu->get_heading();
+    if (config.left_encoder) config.left_encoder->reset();
+    if (config.right_encoder) config.right_encoder->reset();
+    if (config.back_encoder) config.back_encoder->reset();
+    if (config.front_encoder) config.front_encoder->reset();
+    
     pros::Task odom_task(odom_task_fn, this, "Odometry Task");
 }
 

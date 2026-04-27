@@ -7,6 +7,9 @@ namespace vortex {
 void Chassis::swingToHeading(double theta, DriveSide side, int timeout, SwingParams params) {
     if (params.async) return;
 
+    target_x = 99999;
+    target_y = 99999;
+
     Timer timer;
     angular_pid.reset();
 
@@ -17,6 +20,7 @@ void Chassis::swingToHeading(double theta, DriveSide side, int timeout, SwingPar
         if (params.direction == AngularDirection::CW_CLOCKWISE && error < 0) error += 360;
         if (params.direction == AngularDirection::CCW_COUNTERCLOCKWISE && error > 0) error -= 360;
 
+        angle_to_target = error;
         double power = angular_pid.update(error);
         
         if (angular_pid.isSettled(error)) break;
