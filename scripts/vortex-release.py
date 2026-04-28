@@ -36,7 +36,7 @@ VORTEX_ASCII = r"""
 # --- Configuration & Branches ---
 STABLE_BRANCH = "stable"
 DEV_BRANCH = "dev"
-PROD_PATHS = ["src/", "include/", "example/", "firmware/", "Makefile", "common.mk", "project.pros", "LICENSE", "README.md", ".gitignore", "scripts/", "docs/", "mkdocs.yml", ".github/"]
+PROD_PATHS = ["src/", "include/", "Vortex example progect/", "firmware/", "Makefile", "common.mk", "project.pros", "LICENSE", "README.md", ".gitignore", ".github/"]
 
 class VersionManager:
     def __init__(self, file_path="Makefile"):
@@ -237,6 +237,10 @@ def main(major, minor, patch, bug_fix, version, dry_run, no_push):
         # Checkout stable
         if not ProcessManager.run(["git", "checkout", STABLE_BRANCH], f"checkout {STABLE_BRANCH}", dry_run):
             sys.exit(1)
+        
+        # Remove dev-only files from stable
+        if not dry_run:
+            ProcessManager.get_output(["git", "rm", "-rf", "--ignore-unmatch", "scripts", "docs", "mkdocs.yml", ".vscode"])
         
         # Pull production files from dev
         sync_cmd = ["git", "checkout", DEV_BRANCH, "--"] + PROD_PATHS

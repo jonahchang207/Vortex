@@ -2,22 +2,34 @@
 
 Configuring your chassis is the most critical step in setting up Vortex. This tells the library about your motors, gear ratios, and sensors.
 
-## Step 1: Define Motors
+## Step 1: Define Config Header
 
-In `src/main.cpp`, define your `pros::MotorGroup` objects globally at the top of the file using the `vortex::Motors` wrapper:
+To keep your code clean and prevent your `main.cpp` from getting cluttered, we recommend defining your hardware in a dedicated `subsystems.cpp` and exposing it via `subsystems.hpp`.
 
+**`include/subsystems.hpp`**:
 ```cpp
-auto left_motors = vortex::Motors({1, 2, 3});
-auto right_motors = vortex::Motors({-4, -5, -6});
+#pragma once
+#include "vortex/vortex.hpp"
+#include "pros/motor_group.hpp"
+
+// Expose motors and chassis globally
+extern std::shared_ptr<pros::MotorGroup> left_motors;
+extern std::shared_ptr<pros::MotorGroup> right_motors;
+extern vortex::Chassis chassis;
 ```
 
 ---
 
-## Step 2: Configure Sensors
+## Step 2: Define Motors & Sensors
 
-Define your tracking wheels and IMU using the `vortex::Tracker` and `vortex::Imu` wrappers. Each wheel needs a port, its physical diameter, and its lateral offset from the center of the robot.
+In your **`src/subsystems.cpp`**, define your `pros::MotorGroup` objects and sensors using Vortex's clean wrappers.
 
 ```cpp
+#include "main.h"
+
+auto left_motors = vortex::Motors({1, 2, 3});
+auto right_motors = vortex::Motors({-4, -5, -6});
+
 auto vertical_wheel = vortex::Tracker(11, 2.75, 0.0);
 auto horizontal_wheel = vortex::Tracker(12, 2.75, -4.5);
 auto imu = vortex::Imu(20);
@@ -27,7 +39,7 @@ auto imu = vortex::Imu(20);
 
 ## Step 3: Initialize Chassis
 
-Create the global `Chassis` object using the `ChassisConfig` and `ChassisParams` structs at the top of your `main.cpp`. This keeps your configuration clean and centralized.
+Still in **`src/subsystems.cpp`**, create the global `Chassis` object using the `ChassisConfig` and `ChassisParams` structs.
 
 ```cpp
 vortex::Chassis chassis(
@@ -49,6 +61,12 @@ vortex::Chassis chassis(
         .angular_pid = {.kP = 4.0, .kI = 0.0, .kD = 0.5}
     }
 );
+```
+
+Finally, in **`src/main.cpp`**, start the chassis in `initialize()`:
+
+```cpp
+#include "main.h"
 
 void initialize() {
     chassis.initialize(); // Starts the odometry task and background processes

@@ -26,6 +26,11 @@ jobs:
           
       - name: Install PROS CLI
         run: pip install pros-cli
+
+      - name: Fetch Scripts from Dev
+        run: |
+          git fetch origin dev
+          git checkout origin/dev -- scripts/
         
       - name: Build Library Template
         run: |
