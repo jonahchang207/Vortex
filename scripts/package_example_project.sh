@@ -19,7 +19,6 @@ rsync -a ./ "$EXAMPLE_DIR"/ \
   --exclude "Vortex-Example-Project.zip"
 
 cp example/src/main.cpp "$EXAMPLE_DIR/src/main.cpp"
-cp example/include/robot.hpp "$EXAMPLE_DIR/include/robot.hpp"
 cp example/README.md "$EXAMPLE_DIR/README.md"
 
 python3 - "$EXAMPLE_DIR/project.pros" <<'PY'

@@ -43,7 +43,6 @@ jobs:
         run: |
           unzip -l Vortex-Example-Project.zip | grep "project.pros"
           unzip -l Vortex-Example-Project.zip | grep "src/main.cpp"
-          unzip -l Vortex-Example-Project.zip | grep "include/robot.hpp"
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
