@@ -6,6 +6,7 @@ site/
 # Executables
 *.bin
 *.elf
+*.zip
 
 # PROS
 bin/
