@@ -27,6 +27,11 @@ jobs:
       - name: Install PROS CLI
         run: pip install pros-cli
 
+      - name: Fetch Scripts from Dev
+        run: |
+          git fetch origin dev
+          git checkout origin/dev -- scripts/
+
       - name: Build Template Zip
         run: pros make template
 
@@ -43,6 +48,11 @@ jobs:
         run: |
           unzip -l Vortex-Example-Project.zip | grep "project.pros"
           unzip -l Vortex-Example-Project.zip | grep "src/main.cpp"
+          unzip -l Vortex-Example-Project.zip | grep "src/subsystems.cpp"
+          unzip -l Vortex-Example-Project.zip | grep "src/autons.cpp"
+          unzip -l Vortex-Example-Project.zip | grep "include/main.h"
+          unzip -l Vortex-Example-Project.zip | grep "include/subsystems.hpp"
+          unzip -l Vortex-Example-Project.zip | grep "include/autons.hpp"
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
