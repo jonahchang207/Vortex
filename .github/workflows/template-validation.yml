@@ -41,9 +41,9 @@ jobs:
 
       - name: Validate Example Zip Structure
         run: |
-          unzip -l Vortex-Example-Project.zip | rg "project.pros"
-          unzip -l Vortex-Example-Project.zip | rg "src/main.cpp"
-          unzip -l Vortex-Example-Project.zip | rg "include/robot.hpp"
+          unzip -l Vortex-Example-Project.zip | grep "project.pros"
+          unzip -l Vortex-Example-Project.zip | grep "src/main.cpp"
+          unzip -l Vortex-Example-Project.zip | grep "include/robot.hpp"
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4

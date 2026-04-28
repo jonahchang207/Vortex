@@ -7,7 +7,7 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich.prompt import Confirm
+from rich.prompt import Confirm, Prompt
 from rich.theme import Theme
 from rich.table import Table
 
@@ -142,11 +142,12 @@ def show_header():
 @click.command()
 @click.option("--major", is_flag=True, help="Increment major version")
 @click.option("--minor", is_flag=True, help="Increment minor version")
-@click.option("--patch", is_flag=True, default=True, help="Increment patch version (default)")
+@click.option("--patch", is_flag=True, help="Increment patch version")
+@click.option("--bug-fix", is_flag=True, help="Sync to stable without bumping version or creating a release tag")
 @click.option("--version", help="Specify a custom version string")
 @click.option("--dry-run", is_flag=True, help="Preview actions without executing")
 @click.option("--no-push", is_flag=True, help="Commit and tag locally, but do not push to remote")
-def main(major, minor, patch, version, dry_run, no_push):
+def main(major, minor, patch, bug_fix, version, dry_run, no_push):
     show_header()
     
     # Check current branch
@@ -159,9 +160,31 @@ def main(major, minor, patch, version, dry_run, no_push):
     vm = VersionManager()
     current = vm.get_current_version()
     
+    # Prompt if no explicit version option is provided
+    if not any([major, minor, patch, bug_fix, version]):
+        console.print("")
+        console.print(Panel(
+            "[1] Bug Fix (Sync only, no version bump, no tag)\n"
+            "[2] Patch   (Increment patch version, e.g. 0.0.13 -> 0.0.14)\n"
+            "[3] Minor   (Increment minor version, e.g. 0.0.13 -> 0.1.0)\n"
+            "[4] Major   (Increment major version, e.g. 0.0.13 -> 1.0.0)",
+            title="Select Release Type", expand=False, border_style="info"
+        ))
+        choice = Prompt.ask("Enter choice", choices=["1", "2", "3", "4"], default="2")
+        if choice == "1":
+            bug_fix = True
+        elif choice == "2":
+            patch = True
+        elif choice == "3":
+            minor = True
+        elif choice == "4":
+            major = True
+
     # Determine target version
     if version:
         target = version
+    elif bug_fix:
+        target = current
     else:
         part = "patch"
         if major: part = "major"
@@ -194,13 +217,14 @@ def main(major, minor, patch, version, dry_run, no_push):
             sys.exit(0)
 
     # 1. Update Version File on DEV
-    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
-        task = progress.add_task(description=f"Updating {DEV_BRANCH} version...", total=None)
-        if not dry_run:
-            vm.update_file(target)
-            ProcessManager.run(["git", "add", "Makefile"], "git add Makefile", dry_run)
-            ProcessManager.run(["git", "commit", "-m", f"chore: bump version to {target} on {DEV_BRANCH}"], "git commit version", dry_run)
-        progress.update(task, completed=True, description=f"{DEV_BRANCH} version updated!")
+    if not bug_fix:
+        with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+            task = progress.add_task(description=f"Updating {DEV_BRANCH} version...", total=None)
+            if not dry_run:
+                vm.update_file(target)
+                ProcessManager.run(["git", "add", "Makefile"], "git add Makefile", dry_run)
+                ProcessManager.run(["git", "commit", "-m", f"chore: bump version to {target} on {DEV_BRANCH}"], "git commit version", dry_run)
+            progress.update(task, completed=True, description=f"{DEV_BRANCH} version updated!")
 
     # 2. Sync to STABLE
     with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
@@ -218,7 +242,8 @@ def main(major, minor, patch, version, dry_run, no_push):
         # Commit sync
         if not ProcessManager.run(["git", "add", "."], "git add sync", dry_run):
             sys.exit(1)
-        if not ProcessManager.run(["git", "commit", "-m", f"chore: sync v{target} from {DEV_BRANCH}"], "git commit sync", dry_run):
+        commit_msg = f"fix: sync bug fixes from {DEV_BRANCH}" if bug_fix else f"chore: sync v{target} from {DEV_BRANCH}"
+        if not ProcessManager.run(["git", "commit", "-m", commit_msg], "git commit sync", dry_run):
             sys.exit(1)
             
         progress.update(task, completed=True, description=f"{STABLE_BRANCH} synchronization complete!")
@@ -253,12 +278,14 @@ def main(major, minor, patch, version, dry_run, no_push):
 
     # 4. Tag and Push
     with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
-        task = progress.add_task(description=f"Finalizing v{target}...", total=None)
+        task_desc = "Finalizing sync..." if bug_fix else f"Finalizing v{target}..."
+        task = progress.add_task(description=task_desc, total=None)
         
         # Tag on stable
         tag_name = f"v{target}"
-        if not ProcessManager.run(["git", "tag", "-a", tag_name, "-m", f"Release {tag_name}"], "git tag", dry_run):
-            sys.exit(1)
+        if not bug_fix:
+            if not ProcessManager.run(["git", "tag", "-a", tag_name, "-m", f"Release {tag_name}"], "git tag", dry_run):
+                sys.exit(1)
         
         # Push
         if not no_push:
@@ -266,8 +293,9 @@ def main(major, minor, patch, version, dry_run, no_push):
             if not ProcessManager.run(["git", "push", "origin", STABLE_BRANCH], "git push stable", dry_run):
                 sys.exit(1)
             # Push tag
-            if not ProcessManager.run(["git", "push", "origin", tag_name], "git push tag", dry_run):
-                sys.exit(1)
+            if not bug_fix:
+                if not ProcessManager.run(["git", "push", "origin", tag_name], "git push tag", dry_run):
+                    sys.exit(1)
             # Switch back to dev and push
             if not ProcessManager.run(["git", "checkout", DEV_BRANCH], "checkout dev", dry_run):
                 sys.exit(1)
@@ -277,18 +305,23 @@ def main(major, minor, patch, version, dry_run, no_push):
             # Always switch back to dev
             ProcessManager.run(["git", "checkout", DEV_BRANCH], "checkout dev", dry_run)
         
-        progress.update(task, completed=True, description="Release finalized!")
+        progress.update(task, completed=True, description="Sync finalized!" if bug_fix else "Release finalized!")
 
     # Final Summary
     table = Table(title="Cross-Branch Release Summary", show_header=False, border_style="brand")
     table.add_row("Status", "[success]SUCCESS[/success]" if not dry_run else "[warning]DRY RUN COMPLETE[/warning]")
-    table.add_row("Version", f"[version]{target}[/version]")
+    if not bug_fix:
+        table.add_row("Version", f"[version]{target}[/version]")
+    table.add_row("Release Type", "Bug Fix Sync" if bug_fix else "Version Release")
     table.add_row("Target Branch", f"[brand]{STABLE_BRANCH}[/brand]")
     table.add_row("Source Branch", f"{DEV_BRANCH}")
     
     console.print("")
     console.print(table)
-    console.print(f"\n[brand]Vortex v{target} has been synced to {STABLE_BRANCH} and tagged![/brand] 🚀")
+    if bug_fix:
+        console.print(f"\n[brand]Bug fixes have been synced to {STABLE_BRANCH}![/brand] 🚀")
+    else:
+        console.print(f"\n[brand]Vortex v{target} has been synced to {STABLE_BRANCH} and tagged![/brand] 🚀")
     
     if stashed and not dry_run:
         console.print("[info]Restoring stashed changes...[/info]")
