@@ -36,7 +36,7 @@ VORTEX_ASCII = r"""
 # --- Configuration & Branches ---
 STABLE_BRANCH = "stable"
 DEV_BRANCH = "dev"
-PROD_PATHS = ["src/", "include/", "example/", "firmware/", "Makefile", "common.mk", "project.pros", "LICENSE", "README.md", ".gitignore", "scripts/"]
+PROD_PATHS = ["src/", "include/", "example/", "firmware/", "Makefile", "common.mk", "project.pros", "LICENSE", "README.md", ".gitignore", "scripts/", "docs/", "mkdocs.yml", ".github/"]
 
 class VersionManager:
     def __init__(self, file_path="Makefile"):
@@ -173,9 +173,24 @@ def main(major, minor, patch, version, dry_run, no_push):
     console.print(f"Release Branch:  [brand]{STABLE_BRANCH}[/brand]")
     console.print("")
 
+    status = ProcessManager.get_output(["git", "status", "--porcelain"])
+    stashed = False
+    if status and not dry_run:
+        console.print("[warning]Uncommitted changes detected on the current branch.[/warning]")
+        if Confirm.ask("Commit these changes before release? (Selecting 'n' will stash them)", default=True):
+            ProcessManager.run(["git", "add", "."], "git add", dry_run)
+            ProcessManager.run(["git", "commit", "-m", "chore: auto-commit before release"], "git commit", dry_run)
+        else:
+            console.print("[info]Stashing changes...[/info]")
+            ProcessManager.run(["git", "stash"], "git stash", dry_run)
+            stashed = True
+        console.print("")
+
     if not dry_run:
         if not Confirm.ask("Proceed with cross-branch release?"):
             console.print("[warning]Release cancelled by user.[/warning]")
+            if stashed:
+                ProcessManager.run(["git", "stash", "pop"], "git stash pop", dry_run)
             sys.exit(0)
 
     # 1. Update Version File on DEV
@@ -274,6 +289,10 @@ def main(major, minor, patch, version, dry_run, no_push):
     console.print("")
     console.print(table)
     console.print(f"\n[brand]Vortex v{target} has been synced to {STABLE_BRANCH} and tagged![/brand] 🚀")
+    
+    if stashed and not dry_run:
+        console.print("[info]Restoring stashed changes...[/info]")
+        ProcessManager.run(["git", "stash", "pop"], "git stash pop", dry_run)
 
 if __name__ == "__main__":
     main()

@@ -8,9 +8,9 @@ The `TrackingWheel` class represents a physical wheel used for tracking.
 
 ### Constructor
 ```cpp
-TrackingWheel(int port, double wheel_diameter, double offset, double gear_ratio = 1.0);
+TrackingWheel(std::shared_ptr<pros::Rotation> rotation, double wheel_diameter, double offset, double gear_ratio = 1.0);
 ```
-*   **port**: Motor or Rotation sensor port.
+*   **rotation**: Shared pointer to the PROS rotation sensor used by the wheel.
 *   **wheel_diameter**: Diameter of the tracking wheel.
 *   **offset**: Lateral distance from the center of the drivetrain.
 *   **gear_ratio**: External gear ratio (e.g., 36.0/60.0).
@@ -23,16 +23,16 @@ Defines the sensor layout for the `Odom` task.
 
 ```cpp
 struct OdomConfig {
-    std::shared_ptr<TrackingWheel> vertical1;
-    std::shared_ptr<TrackingWheel> vertical2;
-    std::shared_ptr<TrackingWheel> horizontal1;
-    std::shared_ptr<TrackingWheel> horizontal2;
+    std::shared_ptr<TrackingWheel> left_encoder;
+    std::shared_ptr<TrackingWheel> right_encoder;
+    std::shared_ptr<TrackingWheel> back_encoder;
+    std::shared_ptr<TrackingWheel> front_encoder;
     std::shared_ptr<pros::Imu> imu;
 };
 ```
 
-*   **Vertical**: Tracks forward/backward movement.
-*   **Horizontal**: Tracks side-to-side (strafing/scrub) movement.
+*   **left/right**: Parallel tracking wheels for forward/backward movement.
+*   **back/front**: Perpendicular tracking wheels for sideways movement.
 *   **IMU**: Inertial sensor for precise heading.
 
 ---
@@ -45,10 +45,31 @@ Returns the current position and heading.
 Pose getPose(bool radians = false);
 ```
 
+### getDistanceTraveled
+Returns the total tracked distance since start or reset.
+
+```cpp
+double getDistanceTraveled();
+```
+
+### resetDistanceTraveled
+Resets the tracked distance accumulator.
+
+```cpp
+void resetDistanceTraveled();
+```
+
 ### setPose
 Sets the current position and heading. Useful for resetting at the start of autonomous.
 ```cpp
 void setPose(Pose pose);
+```
+
+### calibrate
+Calibrates the IMU if one is configured.
+
+```cpp
+void calibrate();
 ```
 
 ### Pose Struct

@@ -9,9 +9,9 @@ The `vortex::PID` class implements a Proportional-Integral-Derivative controller
 ### PIDSettings
 ```cpp
 struct PIDSettings {
-    double kp, ki, kd;
-    double i_max; // Integral anti-windup limit
-    double slew;  // Output slew rate limit
+    double kP, kI, kD;
+    double windup_range; // Integral anti-windup range
+    double slew;         // Output slew rate limit
 };
 ```
 
@@ -28,6 +28,9 @@ struct ExitCondition {
 ### Methods
 *   `update(double error)`: Calculates the motor power.
 *   `isSettled(double error)`: Returns true if the exit conditions are met.
+*   `reset()`: Clears integral, previous error, and slew state.
+*   `setSettings(PIDSettings settings)`: Replace the current PID configuration.
+*   `setExitCondition(ExitCondition exit_condition)`: Replace the exit condition.
 
 ---
 
@@ -45,4 +48,4 @@ Calculates the target speed for the current distance.
 ```cpp
 double calculate(double distance_to_target, double current_speed);
 ```
-Vortex use this to clamp PID output, ensuring consistent acceleration regardless of how large the target distance is.
+Vortex uses this to clamp PID output in `moveToPoint`, `moveToPose`, and rotational movements. This ensures consistent acceleration and smooth, predictable stopping regardless of how large the target distance is.

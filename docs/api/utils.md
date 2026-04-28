@@ -29,13 +29,14 @@ while (!my_timer.hasPassed(1000)) {
 
 ## Piston (Pneumatics)
 
-A simple wrapper for `pros::ADIDigitalOut`.
+A simple wrapper for `pros::adi::DigitalOut`.
 
 ### Methods
 *   `extend()`: Sets port to HIGH.
 *   `retract()`: Sets port to LOW.
 *   `toggle()`: Flips the state.
-*   `isExtended()`: Returns true if currently HIGH.
+*   `set(bool state)`: Set the piston state directly.
+*   `get()`: Returns the cached extended/retracted state.
 
 ---
 
@@ -46,4 +47,17 @@ Efficient math functions specifically for robotics.
 *   `wrapAngle(rad)`: Wraps angle to $[-\pi, \pi]$.
 *   `wrapAngleDeg(deg)`: Wraps angle to $[-180, 180]$.
 *   `getCurvature(pose, x, y)`: Returns circle curvature for path following.
-*   `EMA alpha`: Exponential Moving Average filter class.
+*   `ExpoDriveCurve(deadband, min_output, curve)`: Exponential joystick response helper.
+*   `LinearDriveCurve(deadband)`: Simple deadband-only joystick response helper.
+
+---
+
+## GUI Utilities
+
+### AutonSelector
+
+Stores autonomous routines and tracks the selected routine and alliance.
+
+### Dashboard
+
+Provides an LVGL-based dashboard for displaying robot pose and selecting autonomous routines.

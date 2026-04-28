@@ -1,0 +1,54 @@
+name: Validate Template
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ARM GNU Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi build-essential
+
+      - name: Install PROS CLI
+        run: pip install pros-cli
+
+      - name: Build Template Zip
+        run: pros make template
+
+      - name: Verify Template Artifact Exists
+        run: ls -1 vortex@*.zip
+
+      - name: Build Full Example Project Zip
+        run: ./scripts/package_example_project.sh "/tmp/vortex-example-project" "Vortex-Example-Project.zip" "$GITHUB_WORKSPACE"
+
+      - name: Validate README Feature Claims
+        run: python3 scripts/validate_feature_claims.py
+
+      - name: Validate Example Zip Structure
+        run: |
+          unzip -l Vortex-Example-Project.zip | rg "project.pros"
+          unzip -l Vortex-Example-Project.zip | rg "src/main.cpp"
+          unzip -l Vortex-Example-Project.zip | rg "include/robot.hpp"
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vortex-template-${{ github.sha }}
+          path: |
+            vortex@*.zip
+            Vortex-Example-Project.zip

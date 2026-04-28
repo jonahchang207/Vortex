@@ -39,6 +39,8 @@ nav:
       - Odometry: api/odom.md
       - PID & Profiles: api/pid-profile.md
       - Utilities: api/utils.md
+  - Development:
+      - Validation: development/validation.md
 
 extra:
   social:

@@ -21,6 +21,20 @@ void opcontrol() {
 }
 ```
 
+### Split Arcade
+If you prefer to have the throttle and turn on separate joysticks (e.g., Left stick for Forward/Back, Right stick for Turn), use `arcadeSplit`:
+
+```cpp
+void opcontrol() {
+    while (true) {
+        // Left stick Y for forward, Right stick X for turn
+        chassis.arcadeSplit(master.get_analog(ANALOG_LEFT_Y), 
+                            master.get_analog(ANALOG_RIGHT_X));
+        pros::delay(10);
+    }
+}
+```
+
 ---
 
 ## Steering Desaturation
