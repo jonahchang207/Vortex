@@ -1,6 +1,7 @@
 #pragma once
 #include "vortex/drive/odom.hpp"
 #include "vortex/control/pid.hpp"
+#include "vortex/control/profile.hpp"
 #include "vortex/util/driveCurve.hpp"
 #include "vortex/util/asset.hpp"
 #include "pros/motor_group.hpp"
@@ -32,8 +33,8 @@ struct MoveToPointParams {
     bool forwards = true;
     int max_speed = 127;
     int min_speed = 0; // For motion chaining
-    double accel = 5.0; // Slew rate
-    double decel = 5.0; // Profile decel
+    double accel = 5.0; // Acceleration (0 to disable)
+    double decel = 5.0; // Deceleration (0 to disable)
     double early_exit_range = 0;
     bool async = false;
 };
@@ -49,10 +50,22 @@ struct MoveToPoseParams {
     bool async = true;
 };
 
+struct PointAndGoParams {
+    bool forwards = true;
+    int max_speed = 127;
+    int min_speed = 0;
+    double accel = 5.0; // Acceleration (0 to disable)
+    double decel = 5.0; // Deceleration (0 to disable)
+    double early_exit_range = 0;
+    bool async = false;
+};
+
 struct TurnParams {
     AngularDirection direction = AngularDirection::AUTO;
     int max_speed = 127;
     int min_speed = 0;
+    double accel = 5.0; // Acceleration (0 to disable)
+    double decel = 5.0; // Deceleration (0 to disable)
     double early_exit_range = 0;
     bool async = true;
 };
@@ -62,6 +75,8 @@ struct SwingParams {
     AngularDirection direction = AngularDirection::AUTO;
     int max_speed = 127;
     int min_speed = 0;
+    double accel = 5.0; // Acceleration (0 to disable)
+    double decel = 5.0; // Deceleration (0 to disable)
     double early_exit_range = 0;
     bool async = true;
 };
@@ -92,6 +107,7 @@ public:
     // --- Driver Control ---
     void tank(int left, int right, double curve = 0.0);
     void arcade(int forward, int turn, double curve = 0.0);
+    void arcadeSplit(int forward, int turn, double curve = 0.0);
     void curvature(int throttle, int turn, double curve = 0.0);
     
     // --- PTO Management ---
@@ -101,6 +117,7 @@ public:
     // --- Autonomous Motions ---
     void moveToPoint(double x, double y, int timeout, MoveToPointParams params = {});
     void moveToPose(double x, double y, double theta, int timeout, MoveToPoseParams params = {});
+    void pointAndGo(double x, double y, int timeout, PointAndGoParams params = {});
     void turnToHeading(double theta, int timeout, TurnParams params = {});
     void turnToPoint(double x, double y, int timeout, TurnParams params = {});
     void swingToHeading(double theta, DriveSide side, int timeout, SwingParams params = {});

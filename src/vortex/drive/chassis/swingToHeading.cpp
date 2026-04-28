@@ -13,6 +13,9 @@ void Chassis::swingToHeading(double theta, DriveSide side, int timeout, SwingPar
     Timer timer;
     angular_pid.reset();
 
+    TrapezoidalProfile profile(params.max_speed, params.accel, params.decel);
+    double last_speed = 0;
+
     while (timer.getElapsed() < (uint32_t)timeout) {
         Pose pose = odom.getPose();
         double error = math::wrapAngleDeg(theta - pose.theta);
@@ -22,6 +25,12 @@ void Chassis::swingToHeading(double theta, DriveSide side, int timeout, SwingPar
 
         angle_to_target = error;
         double power = angular_pid.update(error);
+        double profile_speed = profile.calculate(std::abs(error), last_speed);
+
+        if (std::abs(power) > profile_speed) power = std::copysign(profile_speed, power);
+        if (std::abs(power) < params.min_speed) power = std::copysign(params.min_speed, power);
+
+        last_speed = std::abs(power);
         
         if (angular_pid.isSettled(error)) break;
 

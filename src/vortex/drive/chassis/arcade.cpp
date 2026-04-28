@@ -21,4 +21,9 @@ void Chassis::arcade(int forward, int turn, double curve) {
     config.right_motors->move(right);
 }
 
+void Chassis::arcadeSplit(int forward, int turn, double curve) {
+    // Split arcade uses the same mixing as standard arcade
+    arcade(forward, turn, curve);
+}
+
 } // namespace vortex

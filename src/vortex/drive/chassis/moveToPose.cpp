@@ -15,6 +15,9 @@ void Chassis::moveToPose(double x, double y, double theta, int timeout, MoveToPo
     target_x = x;
     target_y = y;
 
+    TrapezoidalProfile profile(params.max_speed, params.accel, params.decel);
+    double last_speed = 0;
+
     while (timer.getElapsed() < (uint32_t)timeout) {
         Pose pose = odom.getPose();
         
@@ -34,13 +37,23 @@ void Chassis::moveToPose(double x, double y, double theta, int timeout, MoveToPo
         angle_to_target = angle_error;
 
         double linear_power = linear_pid.update(d);
+        double profile_speed = profile.calculate(d, last_speed);
+
+        // Clamp PID output to profile
+        if (linear_power > profile_speed) linear_power = profile_speed;
+        
+        // Ensure min_speed for chaining
+        if (linear_power < params.min_speed) linear_power = params.min_speed;
+        
+        last_speed = linear_power;
+
         double angular_power = angular_pid.update(angle_error);
 
-        if (linear_pid.isSettled(d) || (params.min_speed > 0 && std::abs(linear_power) < params.min_speed)) {
+        if (linear_pid.isSettled(d) || (params.min_speed > 0 && d < params.early_exit_range)) {
             break;
         }
 
-        arcade(linear_power, angular_power);
+        arcade(params.forwards ? linear_power : -linear_power, angular_power);
         pros::delay(10);
     }
 
