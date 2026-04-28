@@ -162,12 +162,16 @@ def main(major, minor, patch, bug_fix, version, dry_run, no_push):
     
     # Prompt if no explicit version option is provided
     if not any([major, minor, patch, bug_fix, version]):
+        next_patch = vm.increment(current, "patch")
+        next_minor = vm.increment(current, "minor")
+        next_major = vm.increment(current, "major")
+        
         console.print("")
         console.print(Panel(
-            "[1] Bug Fix (Sync only, no version bump, no tag)\n"
-            "[2] Patch   (Increment patch version, e.g. 0.0.13 -> 0.0.14)\n"
-            "[3] Minor   (Increment minor version, e.g. 0.0.13 -> 0.1.0)\n"
-            "[4] Major   (Increment major version, e.g. 0.0.13 -> 1.0.0)",
+            f"[1] Bug Fix (Sync only, no version bump, no tag)\n"
+            f"[2] Patch   (Increment patch version, e.g. {current} -> {next_patch})\n"
+            f"[3] Minor   (Increment minor version, e.g. {current} -> {next_minor})\n"
+            f"[4] Major   (Increment major version, e.g. {current} -> {next_major})",
             title="Select Release Type", expand=False, border_style="info"
         ))
         choice = Prompt.ask("Enter choice", choices=["1", "2", "3", "4"], default="2")
