@@ -20,7 +20,7 @@ The **Offset** is the lateral distance from the center of the robot to the track
 
 ```cpp
 // Wheel on the right side, 5 inches from center
-auto right_tracker = std::make_shared<vortex::TrackingWheel>(10, 2.75, 5.0);
+auto right_tracker = vortex::Tracker(10, 2.75, 5.0);
 ```
 
 ---

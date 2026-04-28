@@ -9,15 +9,13 @@ Download this alongside the Vortex template from the [Releases page](https://git
 
 | File | Purpose |
 |---|---|
-| `include/robot.hpp` | All port numbers, PID constants, and physical dimensions in one place |
-| `src/main.cpp` | Full robot code — chassis setup, arcade drive, and an autonomous routine |
+| `src/main.cpp` | Full robot code — a simple, single-file setup containing your chassis configuration, driver control, and autonomous routines |
 
 ### Features Demonstrated
-- **Chassis + Odometry setup** — motor groups, tracking wheels, IMU
+- **Clean Single-File Configuration** — motor groups, tracking wheels, IMU, and PID tuned globally
+- **Chassis + Odometry setup** — automatic background initialization
 - **Arcade drive** with configurable expo curve
-- **`moveToPoint()`** — move to a field coordinate autonomously
-- **`turnToHeading()`** — face a specific direction
-- **`odom.setPose()`** — set starting pose at the beginning of auto
+- **`pointAndGo()` & `moveToPose()`** — basic and advanced autonomous pathing
 - **LCD debugging** — live pose display during driver control
 
 ---
@@ -40,21 +38,22 @@ cp -r example/ ~/my-robot/
 cd ~/my-robot/
 ```
 
-### 3. Edit `include/robot.hpp`
+### 3. Edit `src/main.cpp`
 
-Change the port numbers to match your robot's wiring:
+Change the motor and sensor ports to match your robot's wiring directly at the top of the file:
 
 ```cpp
-constexpr int LEFT_FRONT_PORT  =  1;   // Your actual port
-constexpr int RIGHT_FRONT_PORT = -4;   // Negative = reversed
-constexpr int IMU_PORT         = 10;
+auto left_motors = std::make_shared<pros::MotorGroup>(std::initializer_list<int8_t>{1, 2, 3});
+auto right_motors = std::make_shared<pros::MotorGroup>(std::initializer_list<int8_t>{-4, -5, -6});
 ```
 
 Tune the PID constants after your robot drives:
 
 ```cpp
-constexpr vortex::PIDConstants LINEAR_PID  = { .kP = 8.0, .kI = 0.02, .kD = 1.5 };
-constexpr vortex::PIDConstants ANGULAR_PID = { .kP = 3.5, .kI = 0.0,  .kD = 0.8 };
+    vortex::ChassisParams{
+        .linear_pid = {.kP = 8.0, .kI = 0.02, .kD = 1.5},
+        .angular_pid = {.kP = 3.5, .kI = 0.0, .kD = 0.8}
+    }
 ```
 
 ### 4. Edit the Autonomous Routine
@@ -62,9 +61,9 @@ constexpr vortex::PIDConstants ANGULAR_PID = { .kP = 3.5, .kI = 0.0,  .kD = 0.8 
 In `src/main.cpp`, update the starting pose and waypoints to match your field setup:
 
 ```cpp
-chassis->odom.setPose({ 0.0, 0.0, 90.0 });   // x, y, heading (degrees)
-chassis->moveToPoint({ 0.0, 24.0, 90.0 }, 3000);
-chassis->turnToHeading(0.0, 1500);
+chassis.odom.setPose(0.0, 0.0, 90.0);   // x, y, heading (degrees)
+chassis.pointAndGo(0.0, 24.0, 3000);
+chassis.turnToHeading(0.0, 1500);
 ```
 
 ### 5. Build and Upload

@@ -10,6 +10,7 @@
 #include "vortex/util/auton_selector.hpp"
 #include "vortex/util/logger.hpp"
 #include "vortex/util/timer.hpp"
+#include "vortex/util/wrappers.hpp"
 
 // Control systems
 #include "vortex/control/pid.hpp"

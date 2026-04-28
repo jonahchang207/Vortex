@@ -102,20 +102,26 @@ If you prefer not to use the depot:
 ```cpp
 #include "vortex/vortex.hpp"
 
-auto left  = std::make_shared<pros::MotorGroup>({1, -2, 3});
-auto right = std::make_shared<pros::MotorGroup>({-4, 5, -6});
+auto left  = vortex::Motors({1, -2, 3});
+auto right = vortex::Motors({-4, 5, -6});
 
-vortex::Chassis chassis({
-    .left_motors    = left,
-    .right_motors   = right,
-    .track_width    = 12.5,
-    .wheel_diameter = 3.25,
-    .rpm            = 450,
-    .odom_sensors   = {
-        .vertical1 = std::make_shared<vortex::TrackingWheel>(10, 2.75, 0),
-        .imu       = std::make_shared<pros::Imu>(20)
+vortex::Chassis chassis(
+    vortex::ChassisConfig{
+        .left_motors    = left,
+        .right_motors   = right,
+        .track_width    = 12.5,
+        .wheel_diameter = 3.25,
+        .rpm            = 450,
+        .odom_config    = {
+            .left_encoder = vortex::Tracker(10, 2.75, 0),
+            .imu          = vortex::Imu(20)
+        }
+    },
+    vortex::ChassisParams{
+        .linear_pid = {.kP = 8.0, .kI = 0.02, .kD = 1.5},
+        .angular_pid = {.kP = 3.5, .kI = 0.0, .kD = 0.8}
     }
-});
+);
 ```
 
 ### 3. Drive

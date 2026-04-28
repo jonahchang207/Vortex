@@ -4,8 +4,8 @@
 
 // Minimal main.cpp to pass template compilation
 
-std::shared_ptr<pros::MotorGroup> left_motors = std::make_shared<pros::MotorGroup>(std::vector<int8_t>{1, -2, 3});
-std::shared_ptr<pros::MotorGroup> right_motors = std::make_shared<pros::MotorGroup>(std::vector<int8_t>{-4, 5, -6});
+auto left_motors = vortex::Motors({1, -2, 3});
+auto right_motors = vortex::Motors({-4, 5, -6});
 
 vortex::Chassis chassis(
     vortex::ChassisConfig{
@@ -15,7 +15,7 @@ vortex::Chassis chassis(
         .wheel_diameter = 4.0,
         .rpm = 600,
         .odom_config = {
-            .imu = std::make_shared<pros::Imu>(20)
+            .imu = vortex::Imu(20)
         }
     },
     vortex::ChassisParams{

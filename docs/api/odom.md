@@ -2,15 +2,14 @@
 
 Odometry is the process of using sensors to track the robot's position $(x, y)$ and heading $\theta$ on the field relative to its starting position.
 
-## TrackingWheel
+## Tracker Wrapper
 
-The `TrackingWheel` class represents a physical wheel used for tracking.
+The `vortex::Tracker` function is the easiest way to create a tracking wheel.
 
-### Constructor
 ```cpp
-TrackingWheel(std::shared_ptr<pros::Rotation> rotation, double wheel_diameter, double offset, double gear_ratio = 1.0);
+std::shared_ptr<TrackingWheel> Tracker(int port, double wheel_diameter, double offset, double gear_ratio = 1.0);
 ```
-*   **rotation**: Shared pointer to the PROS rotation sensor used by the wheel.
+*   **port**: PROS smart port of the rotation sensor.
 *   **wheel_diameter**: Diameter of the tracking wheel.
 *   **offset**: Lateral distance from the center of the drivetrain.
 *   **gear_ratio**: External gear ratio (e.g., 36.0/60.0).
